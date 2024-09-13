@@ -48,6 +48,8 @@ if($total_reg_m > 0){
 
 		$query = $pdo->query("SELECT * FROM aulas where curso = '$id_do_curso_pag' and sessao = '$sessao' ORDER BY num_aula asc");
 		$res = $query->fetchAll(PDO::FETCH_ASSOC);
+
+
 		$total_reg = @count($res);
 
 		if($total_reg > 0){
@@ -60,6 +62,7 @@ if($total_reg_m > 0){
 				$sessao_aula = $res[$i]['sessao'];			
 				$link = $res[$i]['link'];
 				$seq_aula = $res[$i]['sequencia_aula'];
+				$tempo_aula = $res[$i]['tempo_aula'];
 
 				if($seq_aula <= $total_aulas_conc){
 					$cor_aula = 'cor-aula';
@@ -78,7 +81,7 @@ echo <<<HTML
 
 
  				<p style="margin-bottom: 3px">
- 				<a href="#" onclick="abrirAula('{$id_aula}', 'aula', '$nome_sessao')" title="Ver Aula" class="link-aula {$ocultar_link}">
+ 				<a href="#" onclick="abrirAula('{$id_aula}', 'aula', '$nome_sessao', '{$tempo_aula}')" title="Ver Aula" class="link-aula {$ocultar_link}">
 				<small>
 				<i class="fa fa-video-camera {$cor_aula}" style="margin-right: 2px"></i>
 				<span class="{$cor_aula}">Aula {$num_aula} - {$nome_aula}</span>

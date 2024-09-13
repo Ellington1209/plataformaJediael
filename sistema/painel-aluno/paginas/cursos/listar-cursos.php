@@ -60,13 +60,19 @@ for($i=0; $i < $total_reg; $i++){
 	
 
 	$query2 = $pdo->query("SELECT * FROM $tab where id = '$curso'");
+	
 	$res2 = $query2->fetchAll(PDO::FETCH_ASSOC);
+
+	
+
 	if(@count($res2) > 0){
 		$nome_curso = $res2[0]['nome'];
 		$nome_url = $res2[0]['nome_url'];
 		$url_do_curso = $link.$nome_url;
 		$id_do_curso = $res2[0]['id'];
 		$link = $res2[0]['link'];
+
+		
 
 	}else{
 		$nome_curso = "";
@@ -75,6 +81,7 @@ for($i=0; $i < $total_reg; $i++){
 
 	$query2 = $pdo->query("SELECT * FROM professores where id = '$professor'");
 	$res2 = $query2->fetchAll(PDO::FETCH_ASSOC);
+
 	if(@count($res2) > 0){
 		$nome_professor = $res2[0]['nome'];		
 	}else{

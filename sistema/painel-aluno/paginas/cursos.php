@@ -108,7 +108,7 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 				</div>
 				<input type="hidden" id="id_da_aula">
 				<!-- Exibir o cronômetro -->
-				<div id="cronometro" style="font-size: 24px; margin-top: 20px;">10:00</div>
+				<div id="cronometro" style="font-size: 24px; margin-top: 20px;"></div>
 			</div>
 		</div>
 	</div>
@@ -397,9 +397,14 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 
 
 <script>
+
 	// Função para iniciar o cronômetro de contagem regressiva
-	function iniciarCronometro() {
-		var tempoRestante = 600; // 10 minutos em segundos
+	function iniciarCronometro(tempo_aula) {
+		// Recupera o tempo restante do localStorage, ou define o tempo da aula caso seja a primeira vez
+		var tempoRestante = localStorage.getItem('tempo_restante') ?
+			parseInt(localStorage.getItem('tempo_restante')) :
+			tempo_aula * 60;
+
 		var cronometroElemento = document.getElementById('cronometro');
 		var btnProximo = document.getElementById('btn-proximo');
 
@@ -409,9 +414,13 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 			var textoCronometro = minutos.toString().padStart(2, '0') + ':' + segundos.toString().padStart(2, '0');
 			cronometroElemento.textContent = textoCronometro;
 
+			// Salvar o tempo restante no localStorage
+			localStorage.setItem('tempo_restante', tempoRestante);
+
 			if (tempoRestante === 0) {
-				// Habilitar o botão "Próximo" quando o cronômetro chegar a zero
+				// Quando o cronômetro zerar, habilitar o botão "Próximo"
 				btnProximo.disabled = false;
+				localStorage.removeItem('tempo_restante'); // Limpar o localStorage
 			} else {
 				tempoRestante--;
 				// Desabilitar o botão "Próximo" enquanto o cronômetro estiver contando
@@ -422,11 +431,6 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 
 		atualizarCronometro();
 	}
-
-	// Chamar a função para iniciar o cronômetro ao carregar a página
-	$(document).ready(function() {
-		iniciarCronometro();
-	});
 </script>
 
 
@@ -454,6 +458,7 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 
 <script type="text/javascript">
 	function abrirAulas(id, nome, aulas, id_curso, link) {
+
 
 		if (link == "") {
 			document.getElementById('link-drive').style.display = 'none';
@@ -495,6 +500,7 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 			dataType: "html",
 
 			success: function(result) {
+
 				$("#listar-aulas").html(result);
 				$('#mensagem-aulas').text('');
 			}
@@ -504,7 +510,8 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 
 
 <script type="text/javascript">
-	function abrirAula(id, aula) {
+	function abrirAula(id, aula, nome, tempo_aula) {
+
 		var id_usu = localStorage.id_usu;
 		var questionario = "<?= $questionario_config ?>";
 
@@ -574,7 +581,7 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 
 			}
 		});
-
+		iniciarCronometro(tempo_aula);
 
 	}
 </script>
@@ -613,6 +620,7 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 			dataType: "html",
 
 			success: function(result) {
+
 				$("#listar").html(result);
 				$('#mensagem-excluir').text('');
 			}
