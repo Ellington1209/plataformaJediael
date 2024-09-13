@@ -126,6 +126,7 @@ HTML;
 			$nome_aula = $res[$i]['nome'];	
 			$num_aula = $res[$i]['num_aula'];
 			$link = $res[$i]['link'];
+			$tempo_aula = $res[$i]['tempo_aula'];
 
 			if($num_aula <= $total_aulas_conc){
 					$cor_aula = 'cor-aula';
@@ -139,7 +140,7 @@ HTML;
 
 echo <<<HTML
 				<p style="margin-bottom: 3px">
- 				<a href="#" onclick="abrirAula('{$id_aula}', 'aula', '')" title="Ver Aula" class="link-aula {$ocultar_link}">
+ 				<a href="#" onclick="abrirAula('{$id_aula}', 'aula', '', '{$tempo_aula}')" title="Ver Aula" class="link-aula {$ocultar_link}">
 				<small>
 				<i class="fa fa-video-camera {$cor_aula}" style="margin-right: 2px"></i>
 				<span class="{$cor_aula}">Aula {$num_aula} - {$nome_aula}</span>
