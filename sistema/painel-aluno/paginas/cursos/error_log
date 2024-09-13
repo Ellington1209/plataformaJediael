@@ -1,0 +1,11 @@
+[05-Jun-2024 14:41:13 America/Sao_Paulo] PHP Warning:  Undefined array key "id" in /home1/educ1860/aestreinamentos.com.br/sistema/painel-aluno/paginas/cursos/listar-cursos.php on line 6
+[05-Jun-2024 14:49:40 America/Sao_Paulo] PHP Warning:  Undefined array key "id" in /home1/educ1860/aestreinamentos.com.br/sistema/painel-aluno/paginas/cursos/listar-cursos.php on line 6
+[06-Jun-2024 18:16:23 America/Sao_Paulo] PHP Warning:  Undefined array key "id" in /home1/educ1860/aestreinamentos.com.br/sistema/painel-aluno/paginas/cursos/listar-perguntas.php on line 5
+[06-Jun-2024 18:16:26 America/Sao_Paulo] PHP Warning:  Undefined array key "id" in /home1/educ1860/aestreinamentos.com.br/sistema/painel-aluno/paginas/cursos/listar-respostas.php on line 5
+[06-Jun-2024 18:16:29 America/Sao_Paulo] PHP Warning:  Undefined array key "id" in /home1/educ1860/aestreinamentos.com.br/sistema/painel-aluno/paginas/cursos/inserir-resposta.php on line 5
+[06-Jun-2024 18:16:29 America/Sao_Paulo] PHP Warning:  Undefined array key "id" in /home1/educ1860/aestreinamentos.com.br/sistema/painel-aluno/paginas/cursos/listar-respostas.php on line 5
+[06-Jun-2024 18:16:29 America/Sao_Paulo] PHP Warning:  Undefined array key "id" in /home1/educ1860/aestreinamentos.com.br/sistema/painel-aluno/paginas/cursos/listar-perguntas.php on line 5
+[06-Jun-2024 18:16:34 America/Sao_Paulo] PHP Warning:  Undefined array key "id" in /home1/educ1860/aestreinamentos.com.br/sistema/painel-aluno/paginas/cursos/inserir-resposta.php on line 5
+[06-Jun-2024 18:16:34 America/Sao_Paulo] PHP Warning:  Undefined array key "id" in /home1/educ1860/aestreinamentos.com.br/sistema/painel-aluno/paginas/cursos/listar-respostas.php on line 5
+[06-Jun-2024 18:16:34 America/Sao_Paulo] PHP Warning:  Undefined array key "id" in /home1/educ1860/aestreinamentos.com.br/sistema/painel-aluno/paginas/cursos/listar-perguntas.php on line 5
+[10-Sep-2024 23:33:02 America/Sao_Paulo] PHP Warning:  Undefined array key "id" in /home1/educ1860/aestreinamentos.com.br/sistema/painel-aluno/paginas/cursos/listar-cursos.php on line 6
