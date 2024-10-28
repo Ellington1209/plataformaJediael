@@ -203,7 +203,7 @@ $senha_usuario = $res[0]['senha'];
                <li class="treeview">
                 <a href="#">
                 <i class="fa fa-book"></i>
-                <span>Cursos </span>
+                <span>Cursos  </span>
                 <i class="fa fa-angle-left pull-right"></i>
                 </a>
                 <ul class="treeview-menu">
@@ -211,6 +211,7 @@ $senha_usuario = $res[0]['senha'];
                 
                    <li class="<?php echo $ocultar ?>"><a href="index.php?pagina=grupos"><i class="fa fa-angle-right"></i> Grupos</a></li>
                     <li class="<?php echo $ocultar ?>"><a href="index.php?pagina=categorias"><i class="fa fa-angle-right"></i> Categorias</a></li>
+                    <li class="<?php echo $ocultar ?>"><a href="index.php?pagina=provas"><i class="fa fa-angle-right"></i> Provas</a></li>
                  
                 
                 </ul>
