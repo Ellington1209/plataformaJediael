@@ -186,7 +186,7 @@ if($nota <= $media_config and $nota != ""){
 echo <<<HTML
 <tr> 
 		<td>		
-		<a href="#" onclick="abrirAulas('{$id}', '{$nome_curso}', '{$aulas}', '{$id_do_curso}', '{$link}')" class="{$classe_nome} $ocultar_aulas">	
+		<a href="#" onclick="abrirAulas('{$id}', '{$nome_curso}', '{$aulas}', '{$id_do_curso}', '{$link}', '{$tempo_aula}')" class="{$classe_nome} $ocultar_aulas">	
 		{$nome_curso}
 		<small><i class="fa fa-video-camera text-dark"></i>	</small>
 		</a>
