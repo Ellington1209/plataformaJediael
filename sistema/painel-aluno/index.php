@@ -151,7 +151,7 @@ $cartao_aluno = $res[0]['cartao'];
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             </button>
-            <h1><a class="navbar-brand" href="index.php"><span class="fa fa-book"></span> Portal EAD<span class="dashboard_text"></span></a></h1>
+            <h1><a class="navbar-brand" href="index.php"><span class="fa fa-book"></span>A&S<span class="dashboard_text"></span></a></h1>
           </div>
           <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="sidebar-menu">
@@ -190,11 +190,7 @@ $cartao_aluno = $res[0]['cartao'];
 
 
 
-               <li class="treeview">
-                <a href="index.php?pagina=cartoes">
-                <i class="fa fa-credit-card"></i> <span>Cartão Fidelidade</span>
-                </a>
-              </li>	
+               
 
 
                 <li class="treeview">

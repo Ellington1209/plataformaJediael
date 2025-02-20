@@ -19,14 +19,14 @@ echo <<<HTML
 	<table class="table table-hover" id="tabela">
 	<thead> 
 	<tr> 
-	<th>Curso</th>
-	<th class="esc">Professor</th> 
-	<th class="esc">Aulas</th> 
-	<th class="esc">Progresso</th> 
-	<th class="esc">Valor</th> 	
-	<th class="esc">Data</th>
-	<th class="esc">Status</th> 	
-	<th>Ações</th>
+		<th>Curso</th>
+		<th class="esc">Professor</th> 
+		<th class="esc">Aulas</th> 
+		<th class="esc">Progresso</th> 
+		<th class="esc">Valor</th> 	
+		<th class="esc">Data</th>
+		<th class="esc">Status</th> 	
+		<th>Ações</th>
 	</tr> 
 	</thead> 
 	<tbody>
@@ -221,33 +221,32 @@ echo <<<HTML
 		<td class="esc"><i class="fa {$icone} $classe_square"></i></td>				
 		<td>
 		
-		<li class="dropdown head-dpdn2 {$excluir}" style="display: flex;">
-		<a href="#" class="dropdown-toggle {$excluir}" data-toggle="dropdown" aria-expanded="false"><big><i class="fa fa-trash-o text-danger"></i></big></a>
+			<li class="dropdown head-dpdn2 {$excluir}" style="display: flex;">
+			<a href="#" class="dropdown-toggle {$excluir}" data-toggle="dropdown" aria-expanded="false"><big><i class="fa fa-trash-o text-danger"></i></big></a>
 
-		<ul class="dropdown-menu" style="margin-left:-230px;">
-		<li>
-		<div class="notification_desc2">
-		<p>Confirmar Exclusão? <a href="#" onclick="excluir('{$id}')"><span class="text-danger">Sim</span></a></p>
-		</div>
-		</li>										
-		</ul>
-		</li>
+			<ul class="dropdown-menu" style="margin-left:-230px;">
+			<li>
+			<div class="notification_desc2">
+			<p>Confirmar Exclusão? <a href="#" onclick="excluir('{$id}')"><span class="text-danger">Sim</span></a></p>
+			</div>
+			</li>										
+			</ul>
+			</li>
 
-		<form method="post" action="../rel/rel_certificado.php" target="_blank" class="{$icones_finalizados}">		
-		<button  type="submit" style="background-color: transparent;  border:none!important;"><img src="img/certificado.png" width="30">
-		</button>
-		<input type="hidden" name="id_mat" value="{$id}">
+			<form method="post" action="../rel/rel_certificado.php" target="_blank" class="{$icones_finalizados}">		
 
-		<big><a class="{$icones_finalizados} {$ocultar_avaliar}" href="#" onclick="avaliar('{$curso}', '{$nome_curso}')" title="Avaliar Curso"><i class="fa fa-star amarelo"></i></a></big>
+			<input type="hidden" name="id_mat" value="{$id}">
 
-		
+			<big><a class="{$icones_finalizados} {$ocultar_avaliar}" href="#" onclick="avaliar('{$curso}', '{$nome_curso}')" title="Avaliar Curso"><i class="fa fa-star amarelo"></i></a></big>
 
-		</form>
+			
 
-		
-		<big><a class="{$classe_quest}" href="#" onclick="questionario('{$curso}', '{$nome_curso}', '{$id}')" title="Iniciar Questionário"><i class="fa fa-question-circle-o verde"></i></a></big>
+			</form>
 
-		<small><span class="text-danger {$classe_nota}">Nota: {$nota}%</span></small>
+			
+			<big><a class="{$classe_quest}" href="#" onclick="questionario('{$curso}', '{$nome_curso}', '{$id}')" title="Iniciar Questionário"><i class="fa fa-question-circle-o verde"></i></a></big>
+
+			<small><span class="text-danger {$classe_nota}">Nota: {$nota}%</span></small>
 
 
 		</td>

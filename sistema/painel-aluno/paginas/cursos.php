@@ -336,51 +336,46 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 
 
 
+<!-- modal prova -->
 
-
-<!-- Modal Questionario -->
 <div class="modal fade" id="modalQuest" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-	<div class="modal-dialog" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h4 class="modal-title" id="exampleModalLabel"><span id="curso_quest"></span> <span class="neutra ocultar-mobile"> </span> </h4>
+    <div class="modal-dialog" role="document" style="max-width: 80%; width: auto;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div style="display: flex; justify-content: center; align-items: center;">
+                    <h3>Prova: </h3>
+                    <h3 class="modal-title" id="exampleModalLabel"><span id="curso_quest"></span> <span class="neutra ocultar-mobile"> </span> </h3>
+                </div>
 
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin-top: -25px" id="btn-fechar-quest">
-					<span class="neutra" aria-hidden="true">&times;</span>
-				</button>
-			</div>
+                <div style="margin-top: 10px;">
+                    <div style="margin-top: 5px; margin-bottom: 5px;">
+                        <h5 style="font-weight: 900; font-size: 16px;">Atenção: Você terá apenas duas tentativas para responder a prova!</h5>
+                    </div>
+                    <h6 style="font-weight: 900; font-size: 16px;">Se prepare, procure  algum lugar onde não haverá interferências</h6>
+                </div>
 
-			<div class="modal-body">
-				<form method="post" id="form-quest">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin-top: -25px" id="btn-fechar-quest">
+                    <span class="neutra" aria-hidden="true">&times;</span>
+                </button>
+            </div>
 
-					<div id="quest">
-
-					</div>
-
-
-					<input type="hidden" name="id_curso" id="id_curso_quest">
-					<input type="hidden" name="id_mat" id="id_mat_quest">
-					<small>
-						<div id="mensagem-quest" align="center" class="mt-3"></div>
-					</small>
-
-
-					<hr>
-					<div class="modal-footer">
-						<button type="submit" class="btn btn-primary">Finalizar</button>
-					</div>
-
-
-
-
-
-				</form>
-
-
-			</div>
-
-		</div>
-	</div>
+            <div class="modal-body">
+                <form method="post" id="form-quest">
+                    <div id="quest">
+                    </div>
+                    <input type="hidden" name="id_curso" id="id_curso_quest">
+                    <input type="hidden" name="id_mat" id="id_mat_quest">
+                    <small>
+                        <div id="mensagem-quest" align="center" class="mt-3"></div>
+                    </small>
+                    <hr>                   
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Finalizar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 
@@ -870,58 +865,48 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 		$.ajax({
 			url: 'paginas/' + pag + "/listar-quest.php",
 			method: 'POST',
-			data: {
-				curso
-			},
+			data: { curso },			
 			dataType: "html",
-
 			success: function(result) {
+				console.log('adsiuids',result)
 				$("#quest").html(result);
-
 			}
 		});
 	}
 
 
 
-	$("#form-quest").submit(function() {
+
+	$("#form-quest").submit(function(event) {
 		event.preventDefault();
-		var formData = new FormData(this);
+
+		var formData = $(this).serialize(); // Serializa os dados do formulário
 
 		$.ajax({
 			url: 'paginas/' + pag + "/resultado.php",
 			type: 'POST',
 			data: formData,
+			dataType: "json", // Especifica que a resposta será um JSON
+			success: function(response) {
+				var mensagemElement = $('#mensagem-quest');
+				mensagemElement.removeClass(); // Remove classes antigas
 
-			success: function(mensagem) {
-				var msg = mensagem.split('***');
-				var nota = msg[1];
-				$('#mensagem-quest').text('');
-				$('#mensagem-quest').removeClass()
-				if (msg[0].trim() == "Aprovado") {
-					alert('Parabéns, você foi aprovado com ' + nota + '%, agora pode retirar seu certificado!');
-					$('#btn-fechar-quest').click();
-					$('#mensagem-quest').text('');
-					listarCursos()
-				} else if (msg[0].trim() == "Reprovado") {
-					alert('Você foi reprovado. sua nota foi de ' + nota + '%, você pode refazer o questionário com atenção para tentar novamente!');
-					$('#btn-fechar-quest').click();
-					$('#mensagem-quest').text('');
-					listarCursos()
-
+				if (response.status === "Aprovado") {
+					mensagemElement.addClass("text-success"); // Cor verde para aprovação
+					mensagemElement.html(`<b>${response.mensagem}</b>`);
+				} else if (response.status === "Reprovado") {
+					mensagemElement.addClass("text-danger"); // Cor vermelha para reprovação
+					mensagemElement.html(`<b>${response.mensagem}</b>`);
 				} else {
-					$('#mensagem-quest').addClass('text-danger')
-					$('#mensagem-quest').text(msg[0])
+					mensagemElement.addClass("text-warning"); // Cor amarela para erros
+					mensagemElement.html(`<b>${response.mensagem}</b>`);
 				}
-
 			},
-
-			cache: false,
-			contentType: false,
-			processData: false,
-
+			error: function(xhr, status, error) {
+				console.error("Erro na requisição:", xhr.responseText);
+				$('#mensagem-quest').addClass("text-danger").html("<b>Erro ao processar a prova. Tente novamente.</b>");
+			}
 		});
-
 	});
 </script>
 <script>
