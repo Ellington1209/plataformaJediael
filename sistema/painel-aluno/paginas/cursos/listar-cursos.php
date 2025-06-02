@@ -154,7 +154,7 @@ for($i=0; $i < $total_reg; $i++){
 	$dataF = implode('/', array_reverse(explode('-', $data)));
 
 
-$classe_quest = 'ocultar';
+$classe_quest = '';
 
 	//pegar o id da matricula
 $query_m = $pdo->query("SELECT * FROM matriculas where id = '$id'");
@@ -239,13 +239,11 @@ echo <<<HTML
 
 			<big><a class="{$icones_finalizados} {$ocultar_avaliar}" href="#" onclick="avaliar('{$curso}', '{$nome_curso}')" title="Avaliar Curso"><i class="fa fa-star amarelo"></i></a></big>
 
-			
+			<big><a class="{$classe_quest}" href="#" onclick="questionario('{$curso}', '{$nome_curso}', '{$id}')" title="Iniciar Questionário"><i class="fa fa-question-circle-o verde"></i></a></big>
 
 			</form>
 
 			
-			<big><a class="{$classe_quest}" href="#" onclick="questionario('{$curso}', '{$nome_curso}', '{$id}')" title="Iniciar Questionário"><i class="fa fa-question-circle-o verde"></i></a></big>
-
 			<small><span class="text-danger {$classe_nota}">Nota: {$nota}%</span></small>
 
 
