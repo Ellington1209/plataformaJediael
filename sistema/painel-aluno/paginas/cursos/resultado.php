@@ -2,13 +2,24 @@
 session_start();
 require_once("../../../conexao.php");
 
-// Verificar se a sessão contém o ID do aluno
+// Verificar se a sessão contém o ID do usuário
 if (!isset($_SESSION['id'])) {
-    echo json_encode(["status" => "erro", "mensagem" => "ID do aluno não encontrado na sessão."]);
+    echo json_encode(["status" => "erro", "mensagem" => "ID do usuário não encontrado na sessão."]);
     exit();
 }
 
-$id_aluno = $_SESSION['id']; 
+// Buscar o id_pessoa (ID do aluno) a partir do ID do usuário
+$id_usuario = $_SESSION['id'];
+$query_usuario = $pdo->prepare("SELECT id_pessoa FROM usuarios WHERE id = ?");
+$query_usuario->execute([$id_usuario]);
+$usuario = $query_usuario->fetch(PDO::FETCH_ASSOC);
+
+if (!$usuario || !$usuario['id_pessoa']) {
+    echo json_encode(["status" => "erro", "mensagem" => "ID do aluno não encontrado."]);
+    exit();
+}
+
+$id_aluno = $usuario['id_pessoa']; // ID real do aluno na tabela alunos 
 $id_prova = $_POST['id_prova'] ?? null;
 $respostas = $_POST; 
 
