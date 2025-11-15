@@ -71,8 +71,11 @@ if($total_reg_m > 0){
 				$res_tempo_check = $query_tempo_check->fetchAll(PDO::FETCH_ASSOC);
 				$aula_concluida_tempo = (@count($res_tempo_check) > 0 && $res_tempo_check[0]['concluido'] == 1);
 				
-				// Permitir acesso se: sequência <= aulas concluídas OU se a aula anterior foi concluída OU se é a primeira aula
-				if($seq_aula <= $total_aulas_conc || $aula_concluida_tempo || $seq_aula == 1){
+				// Verificar se é a primeira aula da lista (índice 0) ou primeira aula da primeira sessão
+				$eh_primeira_aula = ($i == 0 && $sessao == $primeira_sessao);
+				
+				// Permitir acesso se: sequência <= aulas concluídas OU se a aula anterior foi concluída OU se é a primeira aula OU se é a primeira da lista
+				if($seq_aula <= $total_aulas_conc || $aula_concluida_tempo || $seq_aula == 1 || $eh_primeira_aula){
 					$cor_aula = 'cor-aula';
 					$ocultar_link = '';
 					$ocultar_span = 'ocultar';
@@ -142,8 +145,11 @@ HTML;
 			$res_tempo_check2 = $query_tempo_check2->fetchAll(PDO::FETCH_ASSOC);
 			$aula_concluida_tempo2 = (@count($res_tempo_check2) > 0 && $res_tempo_check2[0]['concluido'] == 1);
 			
-			// Permitir acesso se: num_aula <= aulas concluídas OU se a aula foi concluída OU se é a primeira aula
-			if($num_aula <= $total_aulas_conc || $aula_concluida_tempo2 || $num_aula == 1){
+			// Verificar se é a primeira aula da lista (índice 0)
+			$eh_primeira_aula_lista = ($i == 0);
+			
+			// Permitir acesso se: num_aula <= aulas concluídas OU se a aula foi concluída OU se é a primeira aula OU se é a primeira da lista
+			if($num_aula <= $total_aulas_conc || $aula_concluida_tempo2 || $num_aula == 1 || $eh_primeira_aula_lista){
 				$cor_aula = 'cor-aula';
 				$ocultar_link = '';
 				$ocultar_span = 'ocultar';

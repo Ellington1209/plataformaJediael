@@ -426,7 +426,19 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 
 		$('#nome_aula_titulo').text(nome);
 		$('#aulas_aula').text(aulas);
+		
+		// Corrigir aria-hidden quando o modal é aberto (usar off para evitar múltiplos listeners)
+		$('#modalAulas').off('shown.bs.modal').on('shown.bs.modal', function () {
+			$(this).removeAttr('aria-hidden');
+		});
+		
+		// Corrigir aria-hidden quando o modal é fechado
+		$('#modalAulas').off('hidden.bs.modal').on('hidden.bs.modal', function () {
+			$(this).attr('aria-hidden', 'true');
+		});
+		
 		$('#modalAulas').modal('show');
+		
 		$('#id_da_matricula').val(id);
 		$('#id_do_curso').val(id_curso);
 		$('#link_drive_curso').attr('href', link);
