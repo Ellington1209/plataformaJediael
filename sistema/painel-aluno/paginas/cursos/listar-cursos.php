@@ -16,17 +16,29 @@ $res = $query->fetchAll(PDO::FETCH_ASSOC);
 $total_reg = @count($res);
 if($total_reg > 0){
 echo <<<HTML
+	<style>
+		#tabela thead th,
+		#tabela tbody td {
+			vertical-align: middle !important;
+		}
+		#tabela tbody td {
+			padding: 12px 8px !important;
+		}
+		#tabela tbody td:last-child {
+			white-space: nowrap;
+		}
+	</style>
 	<table class="table table-hover" id="tabela">
 	<thead> 
 	<tr> 
-		<th>Curso</th>
-		<th class="esc">Professor</th> 
-		<th class="esc">Aulas</th> 
-		<th class="esc">Progresso</th> 
-		<th class="esc">Valor</th> 	
-		<th class="esc">Data</th>
-		<th class="esc">Status</th> 	
-		<th>Ações</th>
+		<th style="vertical-align: middle;">Curso</th>
+		<th class="esc" style="vertical-align: middle;">Professor</th> 
+		<th class="esc" style="vertical-align: middle;">Aulas</th> 
+		<th style="vertical-align: middle;">Progresso</th> 
+		<th class="esc" style="vertical-align: middle;">Valor</th> 	
+		<th class="esc" style="vertical-align: middle;">Data</th>
+		<th class="esc" style="vertical-align: middle;">Status</th> 	
+		<th style="vertical-align: middle;">Ações</th>
 	</tr> 
 	</thead> 
 	<tbody>
@@ -100,10 +112,19 @@ for($i=0; $i < $total_reg; $i++){
 	$query2 = $pdo->query("SELECT * FROM avaliacoes where curso = '$curso' and aluno = '$id_usuario' ");
 	$res2 = $query2->fetchAll(PDO::FETCH_ASSOC);
 	$avaliacoes = @count($res2);
-	if($avaliacoes > 0){
-		$ocultar_avaliar = 'ocultar';
-	}else{
-		$ocultar_avaliar = '';
+	
+	// Sempre mostrar, mas desabilitar se já foi avaliado ou se não estiver finalizado
+	$avaliar_disabled = '';
+	$avaliar_style = '';
+	$avaliar_tooltip = 'Avaliar Curso';
+	if($avaliacoes > 0 || $status != 'Finalizado'){
+		$avaliar_disabled = 'disabled';
+		$avaliar_style = 'opacity: 0.5; cursor: not-allowed;';
+		if($avaliacoes > 0){
+			$avaliar_tooltip = 'Curso já foi avaliado';
+		} else {
+			$avaliar_tooltip = 'Curso precisa estar finalizado para avaliar';
+		}
 	}
 
 	// Progresso será calculado via JavaScript
@@ -190,8 +211,6 @@ for($i=0; $i < $total_reg; $i++){
 	$dataF = implode('/', array_reverse(explode('-', $data)));
 
 
-$classe_quest = '';
-
 	//pegar o id da matricula
 $query_m = $pdo->query("SELECT * FROM matriculas where id = '$id'");
 $res_m = $query_m->fetchAll(PDO::FETCH_ASSOC);
@@ -210,6 +229,7 @@ $res_config = $query_config->fetchAll(PDO::FETCH_ASSOC);
 $questionario_config = @count($res_config) > 0 ? $res_config[0]['questionario'] : 'Não';
 $media_config = @count($res_config) > 0 ? $res_config[0]['media'] : 60;
 
+// Sempre mostrar questionário, mas desabilitar quando necessário
 $quest_disabled = '';
 $quest_tooltip = '';
 $quest_style = '';
@@ -217,31 +237,36 @@ $quest_style = '';
 if($questionario_config == 'Sim'){
 	// Verificar se todas as aulas foram concluídas
 	if($status_mat != 'Finalizado' and $total_aulas == $aulas_realmente_concluidas){
-		$classe_quest = '';
 		$quest_disabled = '';
+		$quest_style = '';
 		$quest_tooltip = 'Iniciar Questionário';
 	} else {
 		// Desabilitar se não estiver 100% concluído
-		$classe_quest = '';
 		$quest_disabled = 'disabled';
 		$quest_style = 'opacity: 0.5; cursor: not-allowed;';
 		$quest_tooltip = 'Você deve concluir a matéria para fazer a prova, falta assistir ' . $tempo_restante_formatado;
 	}
 } else {
-	$classe_quest = 'ocultar';
+	// Questionário desabilitado no sistema
+	$quest_disabled = 'disabled';
+	$quest_style = 'opacity: 0.5; cursor: not-allowed;';
+	$quest_tooltip = 'Questionário não está habilitado para este curso';
 }
 
+// Validar se deve mostrar nota
 if($nota <= $media_config and $nota != ""){
 	$classe_nota = '';
+	$nota_texto = "Nota: {$nota}%";
 }else{
 	$classe_nota = 'ocultar';
+	$nota_texto = '';
 }
 
 	
 	
 echo <<<HTML
 <tr> 
-		<td>		
+		<td style="vertical-align: middle;">		
 		<a href="#" onclick="abrirAulas('{$id}', '{$nome_curso}', '{$aulas}', '{$id_do_curso}', '{$link}')" class="{$classe_nome} $ocultar_aulas">	
 		{$nome_curso}
 		<small><i class="fa fa-video-camera text-dark"></i>	</small>
@@ -265,17 +290,17 @@ echo <<<HTML
 		
 
 		</td> 		
-		<td class="esc">{$nome_professor}</td>		
-		<td class="esc"><span class="aulas-contador-{$id}">{$aulas_realmente_concluidas}</span> / {$aulas}</td>
-		<td class="esc">
-			<div class="progress" style="height:15px; ">
+		<td class="esc" style="vertical-align: middle;">{$nome_professor}</td>		
+		<td class="esc" style="vertical-align: middle; text-align: center;"><span class="aulas-contador-{$id}">{$aulas_realmente_concluidas}</span> / {$aulas}</td>
+		<td style="vertical-align: middle;">
+			<div class="progress" style="height:15px; margin: 0;">
   				<div class="progress-bar progresso-curso-{$id}" role="progressbar" style="width: 0%; background: {$classe_progress}" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" data-curso="{$curso}">0%</div>
 			</div>
 		</td>
-		<td class="esc">R$ {$valorF} </td>
-		<td class="esc">{$dataF}</td>
-		<td class="esc"><i class="fa {$icone} $classe_square"></i></td>				
-		<td>
+		<td class="esc" style="vertical-align: middle;">R$ {$valorF}</td>
+		<td class="esc" style="vertical-align: middle;">{$dataF}</td>
+		<td class="esc" style="vertical-align: middle; text-align: center;"><i class="fa {$icone} $classe_square"></i></td>				
+		<td style="vertical-align: middle;">
 		
 			<li class="dropdown head-dpdn2 {$excluir}" style="display: flex;">
 			<a href="#" class="dropdown-toggle {$excluir}" data-toggle="dropdown" aria-expanded="false"><big><i class="fa fa-trash-o text-danger"></i></big></a>
@@ -289,18 +314,16 @@ echo <<<HTML
 			</ul>
 			</li>
 
+			<big><a href="#" onclick="if('{$avaliar_disabled}' != 'disabled') { avaliar('{$curso}', '{$nome_curso}'); } else { alert('{$avaliar_tooltip}'); } return false;" title="{$avaliar_tooltip}" style="{$avaliar_style}; min-width: 30px; min-height: 30px; display: inline-block; text-align: center;"><i class="fa fa-star amarelo"></i></a></big>
+
+			<big><a class="quest-link-{$id}" href="#" onclick="if('{$quest_disabled}' != 'disabled' && !$(this).hasClass('disabled')) { questionario('{$curso}', '{$nome_curso}', '{$id}'); } else { alert('{$quest_tooltip}'); } return false;" title="{$quest_tooltip}" style="{$quest_style}; min-width: 30px; min-height: 30px; display: inline-block; text-align: center;" data-tempo-restante="{$tempo_restante_total_segundos}" data-curso-id="{$curso}" data-quest-tooltip="{$quest_tooltip}"><i class="fa fa-question-circle-o verde"></i></a></big>
+
 			<form method="post" action="../rel/rel_certificado.php" target="_blank" class="{$icones_finalizados}">		
-
 			<input type="hidden" name="id_mat" value="{$id}">
-
-			<big><a class="{$icones_finalizados} {$ocultar_avaliar}" href="#" onclick="avaliar('{$curso}', '{$nome_curso}')" title="Avaliar Curso"><i class="fa fa-star amarelo"></i></a></big>
-
-			<big><a class="{$classe_quest} quest-link-{$id}" href="#" onclick="if(!$(this).hasClass('disabled')) { questionario('{$curso}', '{$nome_curso}', '{$id}'); } else { alert('{$quest_tooltip}'); } return false;" title="{$quest_tooltip}" style="{$quest_style}; min-width: 30px; min-height: 30px; display: inline-block; text-align: center;" data-tempo-restante="{$tempo_restante_total_segundos}" data-curso-id="{$curso}" data-quest-tooltip="{$quest_tooltip}"><i class="fa fa-question-circle-o verde"></i></a></big>
-
 			</form>
 
 			
-			<small><span class="text-danger {$classe_nota}">Nota: {$nota}%</span></small>
+			<small><span class="text-danger {$classe_nota}">{$nota_texto}</span></small>
 
 
 		</td>
@@ -427,8 +450,23 @@ HTML;
 			"stateSave": true,
 			"responsive": true,
 			"scrollX": true,
-			"pageLength": 10
+			"pageLength": 10,
+			"autoWidth": false,
+			"columnDefs": [
+				{ "width": "auto", "targets": 0 },
+				{ "width": "auto", "targets": "_all" }
+			]
 		});
+		
+		// Garantir alinhamento das células após inicialização do DataTable
+		setTimeout(function() {
+			$('#tabela thead th, #tabela tbody td').css({
+				'vertical-align': 'middle',
+				'text-align': 'left'
+			});
+			$('#tabela tbody td:last-child').css('text-align', 'left');
+		}, 100);
+		
 		$('#tabela_filter label input').focus();
 		
 		// Melhorar tooltip para mobile - usar toque longo
