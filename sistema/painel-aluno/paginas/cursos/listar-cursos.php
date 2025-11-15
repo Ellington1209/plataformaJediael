@@ -295,7 +295,7 @@ echo <<<HTML
 
 			<big><a class="{$icones_finalizados} {$ocultar_avaliar}" href="#" onclick="avaliar('{$curso}', '{$nome_curso}')" title="Avaliar Curso"><i class="fa fa-star amarelo"></i></a></big>
 
-			<big><a class="{$classe_quest} quest-link-{$id}" href="#" onclick="if(!$(this).hasClass('disabled')) { questionario('{$curso}', '{$nome_curso}', '{$id}'); } return false;" title="{$quest_tooltip}" style="{$quest_style}" data-tempo-restante="{$tempo_restante_total_segundos}" data-curso-id="{$curso}"><i class="fa fa-question-circle-o verde"></i></a></big>
+			<big><a class="{$classe_quest} quest-link-{$id}" href="#" onclick="if(!$(this).hasClass('disabled')) { questionario('{$curso}', '{$nome_curso}', '{$id}'); } else { alert('{$quest_tooltip}'); } return false;" title="{$quest_tooltip}" style="{$quest_style}; min-width: 30px; min-height: 30px; display: inline-block; text-align: center;" data-tempo-restante="{$tempo_restante_total_segundos}" data-curso-id="{$curso}" data-quest-tooltip="{$quest_tooltip}"><i class="fa fa-question-circle-o verde"></i></a></big>
 
 			</form>
 
@@ -373,6 +373,7 @@ HTML;
 								$questLink.css('opacity', '1');
 								$questLink.css('cursor', 'pointer');
 								$questLink.attr('title', 'Iniciar Questionário');
+								$questLink.attr('data-quest-tooltip', 'Iniciar Questionário');
 							} else {
 								// Curso não concluído - desabilitar questionário
 								$questLink.addClass('disabled');
@@ -391,7 +392,9 @@ HTML;
 									tempoFormatado = tempoRestanteMinutos + 'min';
 								}
 								
-								$questLink.attr('title', 'Você deve concluir a matéria para fazer a prova, falta assistir ' + tempoFormatado);
+								var tooltipText = 'Você deve concluir a matéria para fazer a prova, falta assistir ' + tempoFormatado;
+								$questLink.attr('title', tooltipText);
+								$questLink.attr('data-quest-tooltip', tooltipText);
 							}
 						}
 					}
@@ -418,11 +421,28 @@ HTML;
 	}
 
 	$(document).ready( function () {
+		// Configurar DataTable com responsividade para mobile
 		$('#tabela').DataTable({
 			"ordering": false,
 			"stateSave": true,
+			"responsive": true,
+			"scrollX": true,
+			"pageLength": 10
 		});
 		$('#tabela_filter label input').focus();
+		
+		// Melhorar tooltip para mobile - usar toque longo
+		$('[class*="quest-link-"]').on('touchstart', function(e) {
+			var $this = $(this);
+			if($this.hasClass('disabled')) {
+				var tooltip = $this.attr('data-quest-tooltip') || $this.attr('title');
+				if(tooltip) {
+					// Mostrar alerta em mobile quando tocar no ícone desabilitado
+					e.preventDefault();
+					alert(tooltip);
+				}
+			}
+		});
 		
 		// Calcular progresso de todos os cursos após um pequeno delay para garantir que o DOM está pronto
 		setTimeout(function() {

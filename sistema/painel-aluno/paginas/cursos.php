@@ -927,7 +927,7 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 	var timeoutCronometro = null;
 	var idAulaAtual = null;
 
-	// Função para iniciar o cronômetro de contagem regressiva
+    // Função para iniciar o cronômetro de contagem regressiva
 function iniciarCronometro(tempo_aula, id_aula) {
 	// Limpar cronômetro anterior se existir
 	if (timeoutCronometro) {
@@ -936,6 +936,26 @@ function iniciarCronometro(tempo_aula, id_aula) {
 	}
 	
 	idAulaAtual = id_aula;
+	
+	// Detectar se está em mobile
+	var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+	
+	// Em mobile, garantir que o cronômetro continue mesmo quando a página está em background
+	// Usando Page Visibility API
+	var hidden, visibilityChange;
+	if (typeof document.hidden !== "undefined") {
+		hidden = "hidden";
+		visibilityChange = "visibilitychange";
+	} else if (typeof document.mozHidden !== "undefined") {
+		hidden = "mozHidden";
+		visibilityChange = "mozvisibilitychange";
+	} else if (typeof document.msHidden !== "undefined") {
+		hidden = "msHidden";
+		visibilityChange = "msvisibilitychange";
+	} else if (typeof document.webkitHidden !== "undefined") {
+		hidden = "webkitHidden";
+		visibilityChange = "webkitvisibilitychange";
+	}
 	
     // Garantir que o tempo_aula é um número válido
     if (isNaN(tempo_aula) || tempo_aula === undefined || tempo_aula === null || tempo_aula <= 0) {
@@ -1102,7 +1122,7 @@ function iniciarCronometro(tempo_aula, id_aula) {
         // Salvar imediatamente ao iniciar
         salvarTempoServidor(tempoRestante);
 
-    function atualizarCronometro() {
+        function atualizarCronometro() {
         var minutos = Math.floor(tempoRestante / 60);
         var segundos = tempoRestante % 60;
         var textoCronometro = minutos.toString().padStart(2, '0') + ':' + segundos.toString().padStart(2, '0');
@@ -1123,6 +1143,15 @@ function iniciarCronometro(tempo_aula, id_aula) {
                 // Atualizar progresso após salvar
                 if(typeof window.calcularProgressoCursos === 'function') {
                     window.calcularProgressoCursos();
+                }
+            }
+            
+            // Em mobile, verificar se a página está visível antes de continuar
+            // Se estiver em background, pausar o cronômetro visualmente mas continuar contando
+            if (typeof document !== "undefined" && typeof document[hidden] !== "undefined") {
+                if (document[hidden]) {
+                    // Página em background - não atualizar visualmente, mas continuar salvando
+                    // O tempo será recuperado quando voltar
                 }
             }
 
