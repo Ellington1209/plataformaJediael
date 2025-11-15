@@ -75,12 +75,9 @@ if($aula == 'proximo' and $sessao == 0){
 		exit();
 	}
 
-	if($aulas_conc < $proxima){
-		//atualizar aulas concluidas na matricula
-		$query_m = $pdo->query("UPDATE  matriculas SET aulas_concluidas = '$proxima' where id = '$id_mat'");
-	}
-	
-
+	// REMOVIDO: Não atualiza mais aulas_concluidas aqui
+	// A atualização só acontece quando o cronômetro da aula chegar a zero
+	// Isso é feito na função concluirTempo() que chama salvar-tempo-aula.php?acao=concluir
 
 	$query = $pdo->query("SELECT * FROM aulas where curso = '$curso' and num_aula = '$proxima'");
 	$res = $query->fetchAll(PDO::FETCH_ASSOC);
@@ -103,10 +100,9 @@ if($aula == 'proximo' and $sessao != 0){
 		exit();
 	}
 
-	if($aulas_conc < $proxima){
-	//atualizar aulas concluidas na matricula
-	$query_m = $pdo->query("UPDATE  matriculas SET aulas_concluidas = '$proxima' where id = '$id_mat'");
-	}
+	// REMOVIDO: Não atualiza mais aulas_concluidas aqui
+	// A atualização só acontece quando o cronômetro da aula chegar a zero
+	// Isso é feito na função concluirTempo() que chama salvar-tempo-aula.php?acao=concluir
 
 	$query = $pdo->query("SELECT * FROM aulas where curso = '$curso' and sequencia_aula = '$proxima'");
 	$res = $query->fetchAll(PDO::FETCH_ASSOC);

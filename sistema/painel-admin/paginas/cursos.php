@@ -419,7 +419,17 @@ if (@$_SESSION['nivel'] != 'Administrador' and @$_SESSION['nivel'] != 'Professor
 								<div class="col-md-6">
 									<div class="form-group">
 										<label>Tempo de aula</label>
-										<input type="number" name="tempo_aula" id="tempo_aula" class="form-control">
+										<input type="number" name="tempo_aula" id="tempo_aula" class="form-control" placeholder="Tempo em minutos">
+									</div>
+								</div>
+
+								<div class="col-md-6">
+									<div class="form-group">
+										<label>Aula em</label>
+										<select name="aula_em" id="aula_em" class="form-control">
+											<option value="video">Vídeo</option>
+											<option value="pdf">PDF</option>
+										</select>
 									</div>
 								</div>
 

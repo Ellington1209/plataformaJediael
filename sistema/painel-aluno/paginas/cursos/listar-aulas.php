@@ -23,6 +23,7 @@ $res_m = $query_m->fetchAll(PDO::FETCH_ASSOC);
 $total_aulas_conc = $res_m[0]['aulas_concluidas'];
 
 
+
 $query_m = $pdo->query("SELECT * FROM cursos where id = '$id_do_curso_pag'");
 $res_m = $query_m->fetchAll(PDO::FETCH_ASSOC);
 $link_arquivo = $res_m[0]['arquivo'];
@@ -64,7 +65,14 @@ if($total_reg_m > 0){
 				$seq_aula = $res[$i]['sequencia_aula'];
 				$tempo_aula = $res[$i]['tempo_aula'];
 
-				if($seq_aula <= $total_aulas_conc){
+				// Verificar se a aula foi realmente concluída (tempo zerado)
+				$query_tempo_check = $pdo->query("SELECT concluido FROM tempo_aulas 
+				                                  WHERE id_aula = '$id_aula' AND id_aluno = '$id_aluno'");
+				$res_tempo_check = $query_tempo_check->fetchAll(PDO::FETCH_ASSOC);
+				$aula_concluida_tempo = (@count($res_tempo_check) > 0 && $res_tempo_check[0]['concluido'] == 1);
+				
+				// Permitir acesso se: sequência <= aulas concluídas OU se a aula anterior foi concluída OU se é a primeira aula
+				if($seq_aula <= $total_aulas_conc || $aula_concluida_tempo || $seq_aula == 1){
 					$cor_aula = 'cor-aula';
 					$ocultar_link = '';
 					$ocultar_span = 'ocultar';
@@ -128,15 +136,22 @@ HTML;
 			$link = $res[$i]['link'];
 			$tempo_aula = $res[$i]['tempo_aula'];
 
-			if($num_aula <= $total_aulas_conc){
-					$cor_aula = 'cor-aula';
-					$ocultar_link = '';
-					$ocultar_span = 'ocultar';
-				}else{
-					$cor_aula = 'text-muted';
-					$ocultar_link = 'ocultar';
-					$ocultar_span = '';
-				}
+			// Verificar se a aula foi realmente concluída (tempo zerado)
+			$query_tempo_check2 = $pdo->query("SELECT concluido FROM tempo_aulas 
+			                                  WHERE id_aula = '$id_aula' AND id_aluno = '$id_aluno'");
+			$res_tempo_check2 = $query_tempo_check2->fetchAll(PDO::FETCH_ASSOC);
+			$aula_concluida_tempo2 = (@count($res_tempo_check2) > 0 && $res_tempo_check2[0]['concluido'] == 1);
+			
+			// Permitir acesso se: num_aula <= aulas concluídas OU se a aula foi concluída OU se é a primeira aula
+			if($num_aula <= $total_aulas_conc || $aula_concluida_tempo2 || $num_aula == 1){
+				$cor_aula = 'cor-aula';
+				$ocultar_link = '';
+				$ocultar_span = 'ocultar';
+			}else{
+				$cor_aula = 'text-muted';
+				$ocultar_link = 'ocultar';
+				$ocultar_span = '';
+			}
 
 echo <<<HTML
 				<p style="margin-bottom: 3px">

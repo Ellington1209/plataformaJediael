@@ -68,6 +68,7 @@ for($i=0; $i < $total_reg; $i++){
 	$num_aula = $res[$i]['num_aula'];	
 	$link = $res[$i]['link'];
 	$tempo_aula = $res[$i]['tempo_aula'];
+	$aula_em = $res[$i]['aula_em'];
 	$sessao = $res[$i]['sessao'];	
 	
 	$linkF = mb_strimwidth($link, 0, 15, "...");
@@ -82,7 +83,7 @@ echo <<<HTML
 		<td class="esc"><a title="{$link}" href="{$link}" target="_blank">{$linkF}</a></td>		
 				
 		<td>
-		<big><a href="#" onclick="editarAula('{$id}', '{$num_aula}', '{$nome}', '{$link}','{$tempo_aula}', '{$sessao}')" title="Editar Dados"><i class="fa fa-edit text-primary"></i></a></big>
+		<big><a href="#" onclick="editarAula('{$id}', '{$num_aula}', '{$nome}', '{$link}','{$tempo_aula}', '{$aula_em}', '{$sessao}')" title="Editar Dados"><i class="fa fa-edit text-primary"></i></a></big>
 
 		<li class="dropdown head-dpdn2" style="display: inline-block;">
 		<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><big><i class="fa fa-trash-o text-danger"></i></big></a>
@@ -152,6 +153,8 @@ for($i=0; $i < $total_reg; $i++){
 	$nome = $res[$i]['nome'];	
 	$num_aula = $res[$i]['num_aula'];	
 	$link = $res[$i]['link'];
+	$tempo_aula = $res[$i]['tempo_aula'];
+	$aula_em = $res[$i]['aula_em'];
 	$sessao = $res[$i]['sessao'];	
 	
 	$linkF = mb_strimwidth($link, 0, 15, "...");
@@ -169,7 +172,7 @@ echo <<<HTML
 		<td class="esc"><a title="{$link}" href="{$link}" target="_blank">{$linkF}</a></td>		
 				
 		<td>
-		<big><a href="#" onclick="editarAula('{$id}', '{$num_aula}', '{$nome}', '{$link}','{$tempo_aula}', '{$sessao}')" title="Editar Dados"><i class="fa fa-edit text-primary"></i></a></big>
+		<big><a href="#" onclick="editarAula('{$id}', '{$num_aula}', '{$nome}', '{$link}','{$tempo_aula}', '{$aula_em}', '{$sessao}')" title="Editar Dados"><i class="fa fa-edit text-primary"></i></a></big>
 
 		<li class="dropdown head-dpdn2" style="display: inline-block;">
 		<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><big><i class="fa fa-trash-o text-danger"></i></big></a>
@@ -224,14 +227,15 @@ $total_aulas = @count($res);
 		
 	} );
 	
-	function editarAula(id, aula, nome, link, tempo_aula, sessao){
+	function editarAula(id, aula, nome, link, tempo_aula, aula_em, sessao){
 
 		$('#id-da-aula').val(id);
 		$('#link_aula').val(link);
 		$('#nome_aula').val(nome);
 		$('#num_aula').val(aula);
 		$('#sessao_aula').val(sessao);		
-		$('#tempo_aula').val(tempo_aula);		
+		$('#tempo_aula').val(tempo_aula);
+		$('#aula_em').val(aula_em);		
 	}
 
 

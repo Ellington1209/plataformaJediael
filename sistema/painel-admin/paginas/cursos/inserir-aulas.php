@@ -9,6 +9,7 @@ $sessao_aula = $_POST['sessao_aula'];
 $id_curso = $_POST['id'];
 $id_aula = $_POST['id_aula'];
 $tempo_aula = $_POST['tempo_aula'];
+$aula_em = $_POST['aula_em'];
 
 
 //buscar quantidade de aulas do curso
@@ -32,9 +33,9 @@ if($total_reg > 0 and $res[0]['id'] != $id_aula){
 }
 
 if ($id_aula == "") {
-	$query = $pdo->prepare("INSERT INTO $tabela SET num_aula = :num_aula, nome = :nome, link = :link, curso = '$id_curso', sessao = '$sessao_aula', sequencia_aula = '$seq_aula', tempo_aula = :tempo_aula");
+	$query = $pdo->prepare("INSERT INTO $tabela SET num_aula = :num_aula, nome = :nome, link = :link, curso = '$id_curso', sessao = '$sessao_aula', sequencia_aula = '$seq_aula', tempo_aula = :tempo_aula, aula_em = :aula_em");
 } else {
-	$query = $pdo->prepare("UPDATE $tabela SET num_aula = :num_aula, nome = :nome, link = :link, tempo_aula = :tempo_aula, sessao = '$sessao_aula' WHERE id = :id_aula");
+	$query = $pdo->prepare("UPDATE $tabela SET num_aula = :num_aula, nome = :nome, link = :link, tempo_aula = :tempo_aula, sessao = '$sessao_aula', aula_em = :aula_em WHERE id = :id_aula");
 	$query->bindValue(":id_aula", $id_aula);
 	// Bind value only if $id_aula is provided (i.e., not empty)
 	$query->bindValue(":tempo_aula", $tempo_aula);
@@ -44,6 +45,7 @@ $query->bindValue(":nome", $nome_aula);
 $query->bindValue(":num_aula", $num_aula);
 $query->bindValue(":link", $link_aula);
 $query->bindValue(":tempo_aula", $tempo_aula);
+$query->bindValue(":aula_em", $aula_em);
 $query->execute();
 
 
