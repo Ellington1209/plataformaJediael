@@ -103,9 +103,31 @@ for($i=0; $i < $total_reg; $i++){
 	}
 
 	
-	$query2 = $pdo->query("SELECT * FROM aulas where curso = '$curso'");
-	$res2 = $query2->fetchAll(PDO::FETCH_ASSOC);
-	$aulas = @count($res2);
+	// Contar aulas considerando sessões (mesma lógica de listar-aulas.php)
+	$query_sessoes = $pdo->query("SELECT * FROM sessao where curso = '$curso'");
+	$res_sessoes = $query_sessoes->fetchAll(PDO::FETCH_ASSOC);
+	$tem_sessoes = @count($res_sessoes) > 0;
+
+	if($tem_sessoes){
+		// Contar aulas que pertencem a sessões válidas
+		$query_aulas_com_sessao = $pdo->query("SELECT a.* FROM aulas a 
+		                                        INNER JOIN sessao s ON a.sessao = s.id 
+		                                        WHERE a.curso = '$curso' AND s.curso = '$curso' 
+		                                        AND a.sessao IS NOT NULL AND a.sessao != 0");
+		$res_aulas_com_sessao = $query_aulas_com_sessao->fetchAll(PDO::FETCH_ASSOC);
+		$total_com_sessao = @count($res_aulas_com_sessao);
+
+		// Contar aulas sem sessão
+		$query_aulas_sem_sessao = $pdo->query("SELECT * FROM aulas where curso = '$curso' and (sessao = 0 OR sessao IS NULL)");
+		$res_aulas_sem_sessao = $query_aulas_sem_sessao->fetchAll(PDO::FETCH_ASSOC);
+		$total_sem_sessao = @count($res_aulas_sem_sessao);
+
+		$aulas = $total_com_sessao + $total_sem_sessao;
+	}else{
+		$query2 = $pdo->query("SELECT * FROM aulas where curso = '$curso'");
+		$res2 = $query2->fetchAll(PDO::FETCH_ASSOC);
+		$aulas = @count($res2);
+	}
 
 
 	//verificar se o curso já foi avaliado
@@ -218,10 +240,8 @@ $id_mat = $res_m[0]['id'];
 $aulas_conc = $aulas_realmente_concluidas; // Usar aulas realmente concluídas
 $status_mat = $res_m[0]['status'];
 
-//verificar total de aulas do curso
-$query_m = $pdo->query("SELECT * FROM aulas where curso = '$curso'");
-$res_m = $query_m->fetchAll(PDO::FETCH_ASSOC);
-$total_aulas = @count($res_m);
+//verificar total de aulas do curso (usar mesma lógica de contagem)
+$total_aulas = $aulas; // Já foi calculado acima considerando sessões
 
 // Buscar configuração do questionário e média
 $query_config = $pdo->query("SELECT * FROM config");
@@ -235,8 +255,8 @@ $quest_tooltip = '';
 $quest_style = '';
 
 if($questionario_config == 'Sim'){
-	// Verificar se todas as aulas foram concluídas
-	if($status_mat != 'Finalizado' and $total_aulas == $aulas_realmente_concluidas){
+	// Verificar se todas as aulas foram concluídas (permitir mesmo se status já for Finalizado)
+	if($total_aulas > 0 && $total_aulas == $aulas_realmente_concluidas){
 		$quest_disabled = '';
 		$quest_style = '';
 		$quest_tooltip = 'Iniciar Questionário';
@@ -316,7 +336,7 @@ echo <<<HTML
 
 			<big><a href="#" onclick="if('{$avaliar_disabled}' != 'disabled') { avaliar('{$curso}', '{$nome_curso}'); } else { alert('{$avaliar_tooltip}'); } return false;" title="{$avaliar_tooltip}" style="{$avaliar_style}; min-width: 30px; min-height: 30px; display: inline-block; text-align: center;"><i class="fa fa-star amarelo"></i></a></big>
 
-			<big><a class="quest-link-{$id}" href="#" onclick="if('{$quest_disabled}' != 'disabled' && !$(this).hasClass('disabled')) { questionario('{$curso}', '{$nome_curso}', '{$id}'); } else { alert('{$quest_tooltip}'); } return false;" title="{$quest_tooltip}" style="{$quest_style}; min-width: 30px; min-height: 30px; display: inline-block; text-align: center;" data-tempo-restante="{$tempo_restante_total_segundos}" data-curso-id="{$curso}" data-quest-tooltip="{$quest_tooltip}"><i class="fa fa-question-circle-o verde"></i></a></big>
+			<big><a class="quest-link-{$id}" href="#" onclick="var el = $(this); var isDisabled = el.attr('data-quest-disabled') == 'disabled' || el.hasClass('disabled') || el.attr('disabled') == 'disabled'; if(!isDisabled) { questionario('{$curso}', '{$nome_curso}', '{$id}'); } else { var tooltip = el.attr('data-quest-tooltip') || el.attr('title') || '{$quest_tooltip}'; alert(tooltip); } return false;" title="{$quest_tooltip}" style="{$quest_style}; min-width: 30px; min-height: 30px; display: inline-block; text-align: center;" data-tempo-restante="{$tempo_restante_total_segundos}" data-curso-id="{$curso}" data-quest-tooltip="{$quest_tooltip}" data-quest-disabled="{$quest_disabled}"><i class="fa fa-question-circle-o verde"></i></a></big>
 
 			<form method="post" action="../rel/rel_certificado.php" target="_blank" class="{$icones_finalizados}">		
 			<input type="hidden" name="id_mat" value="{$id}">
@@ -390,16 +410,19 @@ HTML;
 							// Atualizar data-tempo-restante com o valor do servidor
 							$questLink.data('tempo-restante', tempoRestanteSegundos);
 							
-							if(porcentagem >= 100 && aulasConcluidas >= totalAulas) {
+							if(porcentagem >= 100 && aulasConcluidas >= totalAulas && totalAulas > 0) {
 								// Curso concluído - habilitar questionário
 								$questLink.removeClass('disabled');
+								$questLink.removeAttr('disabled'); // Remover atributo disabled
 								$questLink.css('opacity', '1');
 								$questLink.css('cursor', 'pointer');
 								$questLink.attr('title', 'Iniciar Questionário');
 								$questLink.attr('data-quest-tooltip', 'Iniciar Questionário');
+								$questLink.attr('data-quest-disabled', ''); // Atualizar data attribute
 							} else {
 								// Curso não concluído - desabilitar questionário
 								$questLink.addClass('disabled');
+								$questLink.attr('disabled', 'disabled'); // Adicionar atributo disabled
 								$questLink.css('opacity', '0.5');
 								$questLink.css('cursor', 'not-allowed');
 								
@@ -418,6 +441,7 @@ HTML;
 								var tooltipText = 'Você deve concluir a matéria para fazer a prova, falta assistir ' + tempoFormatado;
 								$questLink.attr('title', tooltipText);
 								$questLink.attr('data-quest-tooltip', tooltipText);
+								$questLink.attr('data-quest-disabled', 'disabled'); // Atualizar data attribute
 							}
 						}
 					}

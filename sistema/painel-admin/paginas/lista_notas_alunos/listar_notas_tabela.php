@@ -5,14 +5,19 @@ $registros_por_pagina = 30;
 $pagina_atual = isset($_GET['pagina']) ? max(1, (int)$_GET['pagina']) : 1; // Garante que seja pelo menos 1
 $offset = ($pagina_atual - 1) * $registros_por_pagina;
 
-// Consulta para contar total de registros
-$query_total = $pdo->query("SELECT COUNT(*) AS total FROM tentativas_aluno");
+// Consulta para contar total de registros (apenas os que têm aluno válido)
+$query_total = $pdo->query("SELECT COUNT(*) AS total 
+                            FROM tentativas_aluno t
+                            JOIN usuarios a ON t.id_aluno = a.id_pessoa
+                            JOIN provas p ON t.id_prova = p.id");
 $total = $query_total->fetch(PDO::FETCH_ASSOC)['total'];
 $total_paginas = ceil($total / $registros_por_pagina);
 
 // Consulta para buscar os dados paginados
+// t.id_aluno contém o id_pessoa (ID do aluno na tabela alunos)
+// JOIN com usuarios usando id_pessoa para pegar o nome
 $query = $pdo->prepare("SELECT 
-                            a.id AS id_aluno,
+                            t.id_aluno AS id_aluno,
                             a.nome AS nome_aluno,
                             p.id AS id_prova,
                             p.nome AS nome_prova,
@@ -20,7 +25,7 @@ $query = $pdo->prepare("SELECT
                             t.nota,
                             t.data_tentativa
                         FROM tentativas_aluno t
-                        JOIN usuarios a ON t.id_aluno = a.id
+                        JOIN usuarios a ON t.id_aluno = a.id_pessoa
                         JOIN provas p ON t.id_prova = p.id
                         ORDER BY a.nome, p.nome, t.tentativa DESC
                         LIMIT :offset, :registros");

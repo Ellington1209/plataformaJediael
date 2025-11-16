@@ -1,5 +1,25 @@
 <?php
+session_start();
 require_once("../../../conexao.php");
+
+// Verificar se a sessão contém o ID do usuário
+if (!isset($_SESSION['id'])) {
+    echo '<p style="font-weight:200; margin-left: 10px; color: red;">Erro: ID do usuário não encontrado na sessão.</p>';
+    exit();
+}
+
+// Buscar o id_pessoa (ID do aluno) a partir do ID do usuário
+$id_usuario = $_SESSION['id'];
+$query_usuario = $pdo->prepare("SELECT id_pessoa FROM usuarios WHERE id = ?");
+$query_usuario->execute([$id_usuario]);
+$usuario = $query_usuario->fetch(PDO::FETCH_ASSOC);
+
+if (!$usuario || !$usuario['id_pessoa']) {
+    echo '<p style="font-weight:200; margin-left: 10px; color: red;">Erro: ID do aluno não encontrado.</p>';
+    exit();
+}
+
+$id_aluno = $usuario['id_pessoa']; // ID real do aluno na tabela alunos
 
 $id_curso = $_POST['curso'];
 

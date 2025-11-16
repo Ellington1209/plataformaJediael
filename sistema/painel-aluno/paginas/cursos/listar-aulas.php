@@ -34,9 +34,66 @@ echo '<a href="'.$link_arquivo.'" target="_blank" class="cor-aula link-aula"><p 
 
 $query_m = $pdo->query("SELECT * FROM sessao where curso = '$id_do_curso_pag' ORDER BY id asc");
 $res_m = $query_m->fetchAll(PDO::FETCH_ASSOC);
-$total_reg_m = @count($res_m);			
+$total_reg_m = @count($res_m);
+
 if($total_reg_m > 0){
 	$primeira_sessao = $res_m[0]['id'];
+	
+	// Primeiro, mostrar aulas sem sessão (sessao = 0 ou NULL) se existirem
+	$query_aulas_sem_sessao = $pdo->query("SELECT * FROM aulas where curso = '$id_do_curso_pag' and (sessao = 0 OR sessao IS NULL) ORDER BY num_aula asc");
+	$res_aulas_sem_sessao = $query_aulas_sem_sessao->fetchAll(PDO::FETCH_ASSOC);
+	
+	if(@count($res_aulas_sem_sessao) > 0){
+		for($i_sem=0; $i_sem < @count($res_aulas_sem_sessao); $i_sem++){
+			$id_aula = $res_aulas_sem_sessao[$i_sem]['id'];
+			$nome_aula = $res_aulas_sem_sessao[$i_sem]['nome'];	
+			$num_aula = $res_aulas_sem_sessao[$i_sem]['num_aula'];
+			$link = $res_aulas_sem_sessao[$i_sem]['link'];
+			$seq_aula = $res_aulas_sem_sessao[$i_sem]['sequencia_aula'];
+			$tempo_aula = $res_aulas_sem_sessao[$i_sem]['tempo_aula'];
+
+			// Verificar se a aula foi realmente concluída (tempo zerado)
+			$query_tempo_check = $pdo->query("SELECT concluido FROM tempo_aulas 
+			                                  WHERE id_aula = '$id_aula' AND id_aluno = '$id_aluno'");
+			$res_tempo_check = $query_tempo_check->fetchAll(PDO::FETCH_ASSOC);
+			$aula_concluida_tempo = (@count($res_tempo_check) > 0 && $res_tempo_check[0]['concluido'] == 1);
+			
+			// Verificar se é a primeira aula da lista
+			$eh_primeira_aula = ($i_sem == 0);
+			
+			// Permitir acesso se: sequência <= aulas concluídas OU se a aula anterior foi concluída OU se é a primeira aula OU se é a primeira da lista
+			if($seq_aula <= $total_aulas_conc || $aula_concluida_tempo || $seq_aula == 1 || $eh_primeira_aula){
+				$cor_aula = 'cor-aula';
+				$ocultar_link = '';
+				$ocultar_span = 'ocultar';
+			}else{
+				$cor_aula = 'text-muted';
+				$ocultar_link = 'ocultar';
+				$ocultar_span = '';
+			}
+
+echo <<<HTML
+				<p style="margin-bottom: 3px">
+				<a href="#" onclick="abrirAula('{$id_aula}', 'aula', '', '{$tempo_aula}')" title="Ver Aula" class="link-aula {$ocultar_link}">
+				<small>
+				<i class="fa fa-video-camera {$cor_aula}" style="margin-right: 2px"></i>
+				<span class="{$cor_aula}">Aula {$num_aula} - {$nome_aula}</span>
+				<br></small>
+				</a>
+
+				<span class="{$ocultar_span}">
+				<small>
+				<i class="fa fa-video-camera {$cor_aula}" style="margin-right: 2px"></i>
+				<span class="{$cor_aula}">Aula {$num_aula} - {$nome_aula}</span>
+				<br></small>
+				</span>
+
+				</p>
+HTML;
+		}
+		echo '<hr>';
+	}
+	
 	for($i_m=0; $i_m < $total_reg_m; $i_m++){
 		foreach ($res_m[$i_m] as $key => $value){}
 			$sessao = $res_m[$i_m]['id'];
