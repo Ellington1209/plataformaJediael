@@ -666,7 +666,12 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 						btnProximo.disabled = false;
 					}
 					
+					// Debug: verificar valores antes de iniciar cronômetro
+					console.log('DEBUG abrirAula - tempo_aula recebido:', tempo_aula, 'tipo:', typeof tempo_aula);
+					console.log('DEBUG abrirAula - id_aula (res[3]):', res[3], 'tipo:', typeof res[3]);
+					
 					// Iniciar cronômetro após obter o ID da aula
+					// tempo_aula vem do banco em minutos, será convertido para segundos dentro de iniciarCronometro
 					iniciarCronometro(tempo_aula, res[3]);
 
 					/*
@@ -1143,21 +1148,54 @@ function iniciarCronometro(tempo_aula, id_aula) {
 		visibilityChange = "webkitvisibilitychange";
 	}
 	
+    // Debug: verificar valores recebidos
+    console.log('DEBUG Cronômetro - tempo_aula:', tempo_aula, 'tipo:', typeof tempo_aula);
+    console.log('DEBUG Cronômetro - id_aula:', id_aula, 'tipo:', typeof id_aula);
+    
     // Garantir que o tempo_aula é um número válido
+    // Converter para número se for string
+    if (typeof tempo_aula === 'string') {
+        tempo_aula = parseFloat(tempo_aula);
+    }
+    
     if (isNaN(tempo_aula) || tempo_aula === undefined || tempo_aula === null || tempo_aula <= 0) {
+        console.error('DEBUG Cronômetro - ERRO: tempo_aula inválido:', tempo_aula);
+        var cronometroElemento = document.getElementById('cronometro');
+        if (cronometroElemento) {
+            cronometroElemento.textContent = 'Erro: Tempo da aula não configurado';
+            cronometroElemento.style.color = 'red';
+        }
         return; // Interromper a execução caso o valor seja inválido
     }
+    
+    // Converter tempo_aula de minutos para segundos (vem do banco em minutos)
+    tempo_aula = tempo_aula * 60;
 
     // Garantir que o id_aula é válido
     if (!id_aula || id_aula === undefined || id_aula === null) {
+        console.error('DEBUG Cronômetro - ERRO: id_aula inválido:', id_aula);
+        var cronometroElemento = document.getElementById('cronometro');
+        if (cronometroElemento) {
+            cronometroElemento.textContent = 'Erro: ID da aula inválido';
+            cronometroElemento.style.color = 'red';
+        }
         return;
     }
+    
+    console.log('DEBUG Cronômetro - Valores válidos. tempo_aula (segundos):', tempo_aula, 'id_aula:', id_aula);
 
     // Chave única no localStorage baseada no ID da aula
     var chaveLocalStorage = 'tempo_restante_aula_' + id_aula;
 
     var cronometroElemento = document.getElementById('cronometro');
     var btnProximo = document.getElementById('btn-proximo');
+    
+    // Debug: verificar se o elemento do cronômetro existe
+    if (!cronometroElemento) {
+        console.error('DEBUG Cronômetro - ERRO: Elemento #cronometro não encontrado no DOM!');
+        return;
+    }
+    console.log('DEBUG Cronômetro - Elemento #cronometro encontrado:', cronometroElemento);
     var tempoRestante;
     var contadorSalvamento = 0; // Contador para salvar no servidor a cada 10 segundos
 
