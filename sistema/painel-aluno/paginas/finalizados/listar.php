@@ -11,7 +11,7 @@ echo <<<HTML
 <small>
 HTML;
 
-$query = $pdo->query("SELECT * FROM $tabela where aluno = '$id_usuario' and pacote != 'Sim' and status = 'Finalizado' ORDER BY id desc");
+$query = $pdo->query("SELECT * FROM $tabela where aluno = '$id_usuario'  and status = 'Finalizado' ORDER BY id desc");
 $res = $query->fetchAll(PDO::FETCH_ASSOC);
 $total_reg = @count($res);
 if ($total_reg > 0) {
@@ -133,6 +133,7 @@ HTML;
 
 
 		//FORMATAR VALORES
+		$valor = $valor !== null ? (float)$valor : 0; // Garantir que $valor seja float ou 0
 		$valorF = number_format($valor, 2, ',', '.');
 		$dataF = implode('/', array_reverse(explode('-', $data)));
 

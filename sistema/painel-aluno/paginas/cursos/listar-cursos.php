@@ -336,7 +336,7 @@ echo <<<HTML
 
 			<big><a href="#" onclick="if('{$avaliar_disabled}' != 'disabled') { avaliar('{$curso}', '{$nome_curso}'); } else { alert('{$avaliar_tooltip}'); } return false;" title="{$avaliar_tooltip}" style="{$avaliar_style}; min-width: 30px; min-height: 30px; display: inline-block; text-align: center;"><i class="fa fa-star amarelo"></i></a></big>
 
-			<big><a class="quest-link-{$id}" href="#" onclick="var el = $(this); var isDisabled = el.attr('data-quest-disabled') == 'disabled' || el.hasClass('disabled') || el.attr('disabled') == 'disabled'; if(!isDisabled) { questionario('{$curso}', '{$nome_curso}', '{$id}'); } else { var tooltip = el.attr('data-quest-tooltip') || el.attr('title') || '{$quest_tooltip}'; alert(tooltip); } return false;" title="{$quest_tooltip}" style="{$quest_style}; min-width: 30px; min-height: 30px; display: inline-block; text-align: center;" data-tempo-restante="{$tempo_restante_total_segundos}" data-curso-id="{$curso}" data-quest-tooltip="{$quest_tooltip}" data-quest-disabled="{$quest_disabled}"><i class="fa fa-question-circle-o verde"></i></a></big>
+			<big><a class="quest-link-{$id}" href="javascript:void(0);" title="{$quest_tooltip}" style="{$quest_style}; min-width: 30px; min-height: 30px; display: inline-block; text-align: center;" data-tempo-restante="{$tempo_restante_total_segundos}" data-curso-id="{$curso}" data-quest-tooltip="{$quest_tooltip}" data-quest-disabled="{$quest_disabled}" data-curso-nome="{$nome_curso}" data-mat-id="{$id}"><i class="fa fa-question-circle-o verde"></i></a></big>
 
 			<form method="post" action="../rel/rel_certificado.php" target="_blank" class="{$icones_finalizados}">		
 			<input type="hidden" name="id_mat" value="{$id}">
@@ -493,16 +493,32 @@ HTML;
 		
 		$('#tabela_filter label input').focus();
 		
-		// Melhorar tooltip para mobile - usar toque longo
-		$('[class*="quest-link-"]').on('touchstart', function(e) {
+		// Event listener para botão de questionário - compatível com iOS/iPhone
+		// Usar off() primeiro para evitar múltiplos listeners
+		$(document).off('click touchstart', '[class*="quest-link-"]').on('click touchstart', '[class*="quest-link-"]', function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			
 			var $this = $(this);
-			if($this.hasClass('disabled')) {
-				var tooltip = $this.attr('data-quest-tooltip') || $this.attr('title');
-				if(tooltip) {
-					// Mostrar alerta em mobile quando tocar no ícone desabilitado
-					e.preventDefault();
-					alert(tooltip);
+			var isDisabled = $this.attr('data-quest-disabled') == 'disabled' || $this.hasClass('disabled') || $this.attr('disabled') == 'disabled';
+			
+			if(isDisabled) {
+				// Se estiver desabilitado, mostrar tooltip
+				var tooltip = $this.attr('data-quest-tooltip') || $this.attr('title') || 'Você deve concluir a matéria para fazer a prova';
+				alert(tooltip);
+				return false;
+			} else {
+				// Se estiver habilitado, abrir modal de questionário
+				var curso = $this.attr('data-curso-id');
+				var nome = $this.attr('data-curso-nome');
+				var id = $this.attr('data-mat-id');
+				
+				if(curso && nome && id) {
+					questionario(curso, nome, id);
+				} else {
+					console.error('DEBUG - Dados incompletos para abrir questionário:', {curso: curso, nome: nome, id: id});
 				}
+				return false;
 			}
 		});
 		

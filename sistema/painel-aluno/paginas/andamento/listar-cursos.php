@@ -5,13 +5,14 @@ $tabela = 'matriculas';
 @session_start();
 $id_usuario = $_SESSION['id'];
 
+
 $id_pacote = '%'.@$_POST['id'].'%';
 
 echo <<<HTML
 <small>
 HTML;
 
-$query = $pdo->query("SELECT * FROM $tabela where aluno = '$id_usuario' and pacote != 'Sim' and status != 'Finalizado' and aulas_concluidas > 1 ORDER BY id desc");
+$query = $pdo->query("SELECT * FROM $tabela where aluno = '$id_usuario' and status != 'Finalizado' ORDER BY id desc");
 $res = $query->fetchAll(PDO::FETCH_ASSOC);
 $total_reg = @count($res);
 if($total_reg > 0){
@@ -143,6 +144,8 @@ for($i=0; $i < $total_reg; $i++){
 
 	
 	//FORMATAR VALORES
+	// Verificar se $valor não é null antes de formatar
+	$valor = $valor !== null ? (float)$valor : 0;
 	$valorF = number_format($valor, 2, ',', '.');
 	$dataF = implode('/', array_reverse(explode('-', $data)));
 
