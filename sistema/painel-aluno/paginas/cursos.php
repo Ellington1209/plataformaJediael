@@ -608,6 +608,25 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 		var questionario = "<?= $questionario_config ?>";
 
 		$('#id_da_aula').val(id);
+		
+		// Chamar salvar-tempo-aula.php apenas UMA VEZ quando a aula é aberta
+		$.ajax({
+			url: 'paginas/' + pag + "/salvar-tempo-aula.php",
+			method: 'POST',
+			data: {
+				id_aula: id
+			},
+			dataType: "json",
+			success: function(result) {
+				console.log('DEBUG salvar-tempo-aula - Resposta:', result);
+				// Continuar normalmente mesmo se houver erro
+			},
+			error: function(xhr, status, error) {
+				console.error('DEBUG salvar-tempo-aula - Erro:', error);
+				// Continuar normalmente mesmo se houver erro
+			}
+		});
+		
 		$.ajax({
 			url: 'paginas/' + pag + "/listar-video.php",
 			method: 'POST',
@@ -1114,63 +1133,20 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 </script>
 <script>
 
-	// Variável global para controlar o timeout do cronômetro
-	var timeoutCronometro = null;
+	// Variável global para controlar o intervalo de verificação
+	var intervaloVerificacao = null;
 	var idAulaAtual = null;
 
-    // Função para iniciar o cronômetro de contagem regressiva
+    // Função para verificar liberação da aula baseada em timestamp
 function iniciarCronometro(tempo_aula, id_aula) {
-	// Limpar cronômetro anterior se existir
-	if (timeoutCronometro) {
-		clearTimeout(timeoutCronometro);
-		timeoutCronometro = null;
+	// Limpar intervalo anterior se existir
+	if (intervaloVerificacao) {
+		clearInterval(intervaloVerificacao);
+		intervaloVerificacao = null;
 	}
 	
 	idAulaAtual = id_aula;
 	
-	// Detectar se está em mobile
-	var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-	
-	// Em mobile, garantir que o cronômetro continue mesmo quando a página está em background
-	// Usando Page Visibility API
-	var hidden, visibilityChange;
-	if (typeof document.hidden !== "undefined") {
-		hidden = "hidden";
-		visibilityChange = "visibilitychange";
-	} else if (typeof document.mozHidden !== "undefined") {
-		hidden = "mozHidden";
-		visibilityChange = "mozvisibilitychange";
-	} else if (typeof document.msHidden !== "undefined") {
-		hidden = "msHidden";
-		visibilityChange = "msvisibilitychange";
-	} else if (typeof document.webkitHidden !== "undefined") {
-		hidden = "webkitHidden";
-		visibilityChange = "webkitvisibilitychange";
-	}
-	
-    // Debug: verificar valores recebidos
-    console.log('DEBUG Cronômetro - tempo_aula:', tempo_aula, 'tipo:', typeof tempo_aula);
-    console.log('DEBUG Cronômetro - id_aula:', id_aula, 'tipo:', typeof id_aula);
-    
-    // Garantir que o tempo_aula é um número válido
-    // Converter para número se for string
-    if (typeof tempo_aula === 'string') {
-        tempo_aula = parseFloat(tempo_aula);
-    }
-    
-    if (isNaN(tempo_aula) || tempo_aula === undefined || tempo_aula === null || tempo_aula <= 0) {
-        console.error('DEBUG Cronômetro - ERRO: tempo_aula inválido:', tempo_aula);
-        var cronometroElemento = document.getElementById('cronometro');
-        if (cronometroElemento) {
-            cronometroElemento.textContent = 'Erro: Tempo da aula não configurado';
-            cronometroElemento.style.color = 'red';
-        }
-        return; // Interromper a execução caso o valor seja inválido
-    }
-    
-    // Converter tempo_aula de minutos para segundos (vem do banco em minutos)
-    tempo_aula = tempo_aula * 60;
-
     // Garantir que o id_aula é válido
     if (!id_aula || id_aula === undefined || id_aula === null) {
         console.error('DEBUG Cronômetro - ERRO: id_aula inválido:', id_aula);
@@ -1182,11 +1158,6 @@ function iniciarCronometro(tempo_aula, id_aula) {
         return;
     }
     
-    console.log('DEBUG Cronômetro - Valores válidos. tempo_aula (segundos):', tempo_aula, 'id_aula:', id_aula);
-
-    // Chave única no localStorage baseada no ID da aula
-    var chaveLocalStorage = 'tempo_restante_aula_' + id_aula;
-
     var cronometroElemento = document.getElementById('cronometro');
     var btnProximo = document.getElementById('btn-proximo');
     
@@ -1195,211 +1166,93 @@ function iniciarCronometro(tempo_aula, id_aula) {
         console.error('DEBUG Cronômetro - ERRO: Elemento #cronometro não encontrado no DOM!');
         return;
     }
-    console.log('DEBUG Cronômetro - Elemento #cronometro encontrado:', cronometroElemento);
-    var tempoRestante;
-    var contadorSalvamento = 0; // Contador para salvar no servidor a cada 10 segundos
-
-    // Função para recuperar tempo do servidor
-    function recuperarTempoServidor(callback) {
+    
+    // Função para buscar dados da aula e verificar liberação
+    function verificarLiberacao() {
         $.ajax({
             url: 'paginas/' + pag + "/salvar-tempo-aula.php",
             method: 'POST',
             data: {
                 id_aula: id_aula,
-                acao: 'recuperar'
+                acao: 'buscar_dados_aula'
             },
-            dataType: "text",
+            dataType: "json",
             success: function(result) {
-                var tempoServidor = parseInt(result);
+                if (result.erro) {
+                    console.error('DEBUG Cronômetro - Erro ao buscar dados:', result.erro);
+                    if (cronometroElemento) {
+                        cronometroElemento.textContent = 'Erro ao carregar dados da aula';
+                        cronometroElemento.style.color = 'red';
+                    }
+                    return;
+                }
                 
-                if (tempoServidor === -1) {
-                    // Aula já foi concluída
-                    callback(-1);
-                } else if (!isNaN(tempoServidor) && tempoServidor > 0) {
-                    callback(tempoServidor);
+                var concluido = result.concluido || false;
+                var liberado = result.liberado || false;
+                var hora_liberacao = result.hora_liberacao || '';
+                var timestamp_atual = result.timestamp_atual || Math.floor(Date.now() / 1000);
+                var timestamp_liberacao = result.timestamp_liberacao || 0;
+                
+                console.log('DEBUG Cronômetro - Dados recebidos:', {
+                    concluido: concluido,
+                    liberado: liberado,
+                    hora_liberacao: hora_liberacao,
+                    timestamp_atual: timestamp_atual,
+                    timestamp_liberacao: timestamp_liberacao
+                });
+                
+                if (concluido || liberado) {
+                    // Aula já foi liberada/concluída
+                    if (btnProximo) {
+                        btnProximo.disabled = false;
+                    }
+                    if (cronometroElemento) {
+                        cronometroElemento.textContent = 'Aula liberada';
+                        cronometroElemento.style.color = 'green';
+                    }
+                    // Limpar intervalo
+                    if (intervaloVerificacao) {
+                        clearInterval(intervaloVerificacao);
+                        intervaloVerificacao = null;
+                    }
+                    // Atualizar progresso
+                    if(typeof window.calcularProgressoCursos === 'function') {
+                        window.calcularProgressoCursos();
+                    }
                 } else {
-                    // Se não encontrar no servidor, usar o tempo inicial (tempo_aula já está em segundos)
-                    callback(tempo_aula);
+                    // Aula ainda não foi liberada - mostrar hora de liberação
+                    if (btnProximo) {
+                        btnProximo.disabled = true;
+                    }
+                    if (cronometroElemento && hora_liberacao) {
+                        cronometroElemento.textContent = 'Esta aula será liberada às ' + hora_liberacao + ' hrs';
+                        cronometroElemento.style.color = '#333';
+                    }
                 }
             },
-            error: function() {
-                // Em caso de erro, usar o tempo do localStorage ou inicial
-                var tempoLocal = localStorage.getItem(chaveLocalStorage);
-                if (tempoLocal && !isNaN(tempoLocal) && parseInt(tempoLocal) > 0) {
-                    callback(parseInt(tempoLocal));
-                } else {
-                    callback(tempo_aula); // tempo_aula já está em segundos
-                }
-            }
-        });
-    }
-
-    // Função para salvar tempo no servidor
-    function salvarTempoServidor(tempo) {
-        $.ajax({
-            url: 'paginas/' + pag + "/salvar-tempo-aula.php",
-            method: 'POST',
-            data: {
-                id_aula: id_aula,
-                tempo_restante: tempo,
-                acao: 'salvar'
-            },
-            dataType: "text",
-            success: function(result) {
-                // Sucesso silencioso
-            },
-            error: function() {
-                // Erro silencioso
-            }
-        });
-    }
-
-    // Função para marcar como concluído quando a aula for concluída
-    function concluirTempo() {
-        localStorage.removeItem(chaveLocalStorage);
-        $.ajax({
-            url: 'paginas/' + pag + "/salvar-tempo-aula.php",
-            method: 'POST',
-            data: {
-                id_aula: id_aula,
-                acao: 'concluir'
-            },
-            dataType: "text",
-            success: function() {
-                // Atualizar progresso após concluir aula
-                if(typeof window.calcularProgressoCursos === 'function') {
-                    window.calcularProgressoCursos();
+            error: function(xhr, status, error) {
+                console.error('DEBUG Cronômetro - Erro na requisição:', error);
+                if (cronometroElemento) {
+                    cronometroElemento.textContent = 'Erro ao verificar liberação';
+                    cronometroElemento.style.color = 'red';
                 }
             }
         });
     }
     
-    // Função para verificar se já foi concluído
-    function verificarConcluido(callback) {
-        $.ajax({
-            url: 'paginas/' + pag + "/salvar-tempo-aula.php",
-            method: 'POST',
-            data: {
-                id_aula: id_aula,
-                acao: 'verificar_concluido'
-            },
-            dataType: "text",
-            success: function(result) {
-                callback(result.trim() === '1');
-            },
-            error: function() {
-                callback(false);
-            }
-        });
-    }
-
-    // Primeiro verificar se já foi concluído
-    verificarConcluido(function(jaConcluido) {
-        if (jaConcluido) {
-            // Se já foi concluído, habilitar botão próximo e não iniciar cronômetro
-            if (btnProximo) {
-                btnProximo.disabled = false;
-            }
-            if (cronometroElemento) {
-                cronometroElemento.textContent = '00:00 - Já concluída';
-            }
-            return; // Não inicia o cronômetro
-        }
-        
-        // Se não foi concluído, continua normalmente
-        // Inicializar: primeiro tenta recuperar do localStorage, depois do servidor
-        var tempoLocal = localStorage.getItem(chaveLocalStorage);
-        if (tempoLocal && !isNaN(tempoLocal) && parseInt(tempoLocal) > 0) {
-            tempoRestante = parseInt(tempoLocal);
-            iniciarContagem();
-        } else {
-            // Se não tiver no localStorage, recupera do servidor
-            recuperarTempoServidor(function(tempo) {
-                if (tempo === -1) {
-                    // Aula já foi concluída (caso raro de inconsistência)
-                    if (btnProximo) {
-                        btnProximo.disabled = false;
-                    }
-                    if (cronometroElemento) {
-                        cronometroElemento.textContent = '00:00 - Já concluída';
-                    }
-                    return;
-                }
-                // Se tempo for 0 ou não houver registro, usar o tempo total da aula
-                if (tempo === 0 || tempo === null || tempo === undefined) {
-                    tempoRestante = tempo_aula; // tempo_aula já está em segundos no banco
-                } else {
-                    tempoRestante = tempo;
-                }
-                localStorage.setItem(chaveLocalStorage, tempoRestante);
-                iniciarContagem();
-            });
+    // Verificar imediatamente
+    verificarLiberacao();
+    
+    // Verificar a cada 10 segundos
+    intervaloVerificacao = setInterval(verificarLiberacao, 10000);
+    
+    // Limpar intervalo quando o modal for fechado
+    $('#modalAula').on('hidden.bs.modal', function() {
+        if (intervaloVerificacao) {
+            clearInterval(intervaloVerificacao);
+            intervaloVerificacao = null;
         }
     });
-
-    function iniciarContagem() {
-        // Desabilitar botão próximo inicialmente
-        if (btnProximo) {
-            btnProximo.disabled = true;
-        }
-        
-        // Salvar imediatamente ao iniciar
-        salvarTempoServidor(tempoRestante);
-
-        function atualizarCronometro() {
-        var minutos = Math.floor(tempoRestante / 60);
-        var segundos = tempoRestante % 60;
-        var textoCronometro = minutos.toString().padStart(2, '0') + ':' + segundos.toString().padStart(2, '0');
-            
-            // Atualizar display a cada segundo (visual)
-            if (cronometroElemento) {
-        cronometroElemento.textContent = textoCronometro;
-            }
-
-            // Salvar no localStorage a cada segundo
-            localStorage.setItem(chaveLocalStorage, tempoRestante);
-
-            // Salvar no servidor a cada 1 minuto (60 segundos)
-            contadorSalvamento++;
-            if (contadorSalvamento >= 60) {
-                salvarTempoServidor(tempoRestante);
-                contadorSalvamento = 0;
-                // Atualizar progresso após salvar
-                if(typeof window.calcularProgressoCursos === 'function') {
-                    window.calcularProgressoCursos();
-                }
-            }
-            
-            // Em mobile, verificar se a página está visível antes de continuar
-            // Se estiver em background, pausar o cronômetro visualmente mas continuar contando
-            if (typeof document !== "undefined" && typeof document[hidden] !== "undefined") {
-                if (document[hidden]) {
-                    // Página em background - não atualizar visualmente, mas continuar salvando
-                    // O tempo será recuperado quando voltar
-                }
-            }
-
-            if (tempoRestante <= 0) {
-            // Quando o cronômetro zerar, habilitar o botão "Próximo"
-                if (btnProximo) {
-            btnProximo.disabled = false;
-                }
-                if (cronometroElemento) {
-                    cronometroElemento.textContent = '00:00';
-                }
-                concluirTempo();
-        } else {
-                tempoRestante -= 1; // Decrementar 1 segundo a cada atualização
-            // Desabilitar o botão "Próximo" enquanto o cronômetro estiver contando
-                if (btnProximo) {
-            btnProximo.disabled = true;
-                }
-                timeoutCronometro = setTimeout(atualizarCronometro, 1000); // Atualizar a cada 1 segundo (visual)
-        }
-    }
-
-    atualizarCronometro();
-    }
 }
 
 </script>
