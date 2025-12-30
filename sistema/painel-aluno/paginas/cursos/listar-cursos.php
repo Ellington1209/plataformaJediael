@@ -152,32 +152,54 @@ for($i=0; $i < $total_reg; $i++){
 	// Progresso será calculado via JavaScript
 	$aulas_realmente_concluidas = $aulas_concluidas;
 	
-	// Calcular tempo restante total do curso (para tooltip do questionário)
+	// Calcular tempo restante total do curso (para tooltip do questionário) usando timestamp
 	$tempo_restante_total_segundos = 0;
+	$timestamp_atual = time();
 	$query_aulas_curso = $pdo->query("SELECT id, tempo_aula FROM aulas WHERE curso = '$curso'");
 	$res_aulas_curso = $query_aulas_curso->fetchAll(PDO::FETCH_ASSOC);
 	
 	foreach($res_aulas_curso as $aula_curso) {
 		$id_aula_curso = $aula_curso['id'];
-		$tempo_aula_curso = (int)$aula_curso['tempo_aula']; // em minutos
+		$tempo_aula_curso_minutos = (int)$aula_curso['tempo_aula']; // em minutos
+		$tempo_aula_curso_segundos = $tempo_aula_curso_minutos * 60;
 		
-		if($tempo_aula_curso > 0) {
-			// Buscar registro na tabela tempo_aulas
-			$query_tempo_curso = $pdo->query("SELECT tempo_restante, concluido FROM tempo_aulas 
+		if($tempo_aula_curso_minutos > 0) {
+			// Buscar registro na tabela tempo_aulas usando timestamp_inicio
+			$query_tempo_curso = $pdo->query("SELECT timestamp_inicio, data_criacao, concluido FROM tempo_aulas 
 			                                 WHERE id_aula = '$id_aula_curso' AND id_aluno = '$id_usuario'");
 			$res_tempo_curso = $query_tempo_curso->fetchAll(PDO::FETCH_ASSOC);
 			
 			if(@count($res_tempo_curso) > 0) {
-				$tempo_restante_aula = (int)$res_tempo_curso[0]['tempo_restante']; // em segundos
 				$concluido_aula = (int)$res_tempo_curso[0]['concluido'];
+				$timestamp_inicio = $res_tempo_curso[0]['timestamp_inicio'];
+				$data_criacao = $res_tempo_curso[0]['data_criacao'];
 				
 				if($concluido_aula == 0) {
-					// Se não está concluída, adicionar o tempo restante
-					$tempo_restante_total_segundos += $tempo_restante_aula;
+					// Se não tem timestamp_inicio, usar data_criacao como fallback
+					if(!$timestamp_inicio || $timestamp_inicio == 0) {
+						if($data_criacao) {
+							$timestamp_inicio = strtotime($data_criacao);
+						}
+					}
+					
+					if($timestamp_inicio && $timestamp_inicio > 0) {
+						// Calcular timestamp de liberação
+						$timestamp_liberacao = $timestamp_inicio + $tempo_aula_curso_segundos;
+						
+						// Calcular tempo restante
+						if($timestamp_atual < $timestamp_liberacao) {
+							$tempo_restante_aula = $timestamp_liberacao - $timestamp_atual;
+							$tempo_restante_total_segundos += $tempo_restante_aula;
+						}
+						// Se já passou o tempo, não adiciona nada (aula já deveria estar concluída)
+					} else {
+						// Se não tem registro de início, a aula não foi iniciada, então o tempo total é o tempo da aula
+						$tempo_restante_total_segundos += $tempo_aula_curso_segundos;
+					}
 				}
 			} else {
 				// Se não tem registro, a aula não foi iniciada, então o tempo total é o tempo da aula
-				$tempo_restante_total_segundos += $tempo_aula_curso * 60; // converter minutos para segundos
+				$tempo_restante_total_segundos += $tempo_aula_curso_segundos;
 			}
 		}
 	}
