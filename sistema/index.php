@@ -1,4 +1,26 @@
 <?php 
+@session_start();
+
+// Verificar se já está logado e redirecionar ANTES de qualquer output
+// Usar ob_start() para evitar problemas com headers já enviados
+if(!ob_get_level()) {
+	ob_start();
+}
+
+if(isset($_SESSION['nivel']) && !empty($_SESSION['nivel'])){
+	if($_SESSION['nivel'] == 'Administrador' || $_SESSION['nivel'] == 'Professor'){
+		ob_clean();
+		header('Location: painel-admin/index.php');
+		exit();
+	}
+	
+	if($_SESSION['nivel'] == 'Aluno'){
+		ob_clean();
+		header('Location: painel-aluno/index.php');
+		exit();
+	}
+}
+
 require_once('conexao.php');
 $senha = '123';
 $senha_crip = md5($senha);

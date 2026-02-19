@@ -32,26 +32,26 @@ if(@count($res) > 0){
 	$_SESSION['cpf'] = $res[0]['cpf'];
 	$_SESSION['id'] = $res[0]['id'];
 	$_SESSION['nome'] = $res[0]['nome'];
-
 	
 	$id = $res[0]['id'];
-	echo "<script>localStorage.setItem('id_usu', '$id')</script>";
-
-	if($_SESSION['nivel'] == 'Administrador'){
-		echo "<script>window.location='painel-admin'</script>";
+	$nivel = $res[0]['nivel'];
+	
+	// Garantir que a sessão seja salva
+	session_regenerate_id(true);
+	
+	// Redirecionar usando header primeiro, depois JavaScript para localStorage
+	if($nivel == 'Administrador' || $nivel == 'Professor'){
+		// Salvar no localStorage e redirecionar
+		echo "<!DOCTYPE html><html><head><script>localStorage.setItem('id_usu', '$id'); window.location.href='painel-admin/index.php';</script></head><body></body></html>";
+		exit();
 	}
 
-	if($_SESSION['nivel'] == 'Professor'){
-		echo "<script>window.location='painel-admin'</script>";
-	}
-
-	if($_SESSION['nivel'] == 'Aluno'){
-		echo "<script>window.location='painel-aluno'</script>";
+	if($nivel == 'Aluno'){
+		echo "<!DOCTYPE html><html><head><script>localStorage.setItem('id_usu', '$id'); window.location.href='painel-aluno/index.php';</script></head><body></body></html>";
+		exit();
 	}
 		 
 }else{
 	echo "<script>window.alert('Dados Incorretos!')</script>";
 	echo "<script>window.location='index.php'</script>";
 }
-
- ?>

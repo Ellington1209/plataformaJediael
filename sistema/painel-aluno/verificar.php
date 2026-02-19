@@ -1,7 +1,6 @@
 <?php 
 @session_start();
-if(@$_SESSION['nivel'] != 'Aluno'){
-	echo "<script>window.location='../index.php'</script>";
+if(!isset($_SESSION['nivel']) || $_SESSION['nivel'] != 'Aluno'){
+	header('Location: ../index.php');
 	exit();
-}	
- ?>
+}

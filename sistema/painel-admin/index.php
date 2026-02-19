@@ -213,7 +213,7 @@ $senha_usuario = $res[0]['senha'];
                    <li class="<?php echo $ocultar ?>"><a href="index.php?pagina=categorias"><i class="fa fa-angle-right"></i> Categorias</a></li>
                    <li class="<?php echo $ocultar ?>"><a href="index.php?pagina=provas"><i class="fa fa-angle-right"></i> Provas</a></li>
 				   <li class="<?php echo $ocultar ?>"><a href="index.php?pagina=lista_notas_alunos"><i class="fa fa-angle-right"></i> Notas de Provas por aluno</a></li>
-                
+				   <li class="<?php echo $ocultar ?>"><a href="index.php?pagina=lista_notas_alunos"><i class="fa fa-angle-right"></i> Liberar Provas alunos</a></li>
                 </ul>
               </li>
 
