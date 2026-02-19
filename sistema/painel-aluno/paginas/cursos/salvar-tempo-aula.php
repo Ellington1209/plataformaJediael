@@ -1,24 +1,27 @@
-<?php 
+<?php
+ini_set('display_errors', '0');
+error_reporting(0);
+ob_start();
+header('Content-Type: application/json; charset=utf-8');
 require_once("../../../conexao.php");
 @session_start();
 
-$id_aula = @$_POST['id_aula'];
-$id_aluno = @$_SESSION['id'];
-$acao = @$_POST['acao'];
+$id_aula = isset($_POST['id_aula']) ? $_POST['id_aula'] : null;
+$id_aluno = isset($_SESSION['id']) ? $_SESSION['id'] : null;
+$acao = isset($_POST['acao']) ? $_POST['acao'] : null;
 
-// Se for ação buscar_dados_aula, não precisa verificar id_aluno aqui (será verificado dentro)
 if($acao != 'buscar_dados_aula') {
-    // Verificar se os dados estão completos
     if(!$id_aula || !$id_aluno) {
+        ob_end_clean();
         echo json_encode(['erro' => 'Dados incompletos']);
         exit();
     }
 }
 
-// Ação para buscar dados da aula para o cronômetro
 if($acao == 'buscar_dados_aula') {
     try {
         if(!$id_aula || !$id_aluno) {
+            ob_end_clean();
             echo json_encode(['erro' => 'Dados incompletos']);
             exit();
         }
@@ -55,6 +58,7 @@ if($acao == 'buscar_dados_aula') {
                 // Calcular hora de liberação formatada
                 $hora_liberacao = date('H:i', $timestamp_liberacao);
                 
+                ob_end_clean();
                 echo json_encode([
                     'concluido' => $concluido == 1,
                     'timestamp_inicio' => $timestamp_inicio,
@@ -66,14 +70,16 @@ if($acao == 'buscar_dados_aula') {
                     'liberado' => ($timestamp_atual >= $timestamp_liberacao) || ($concluido == 1)
                 ]);
             } else {
+                ob_end_clean();
                 echo json_encode(['erro' => 'Timestamp de início não encontrado']);
             }
         } else {
+            ob_end_clean();
             echo json_encode(['erro' => 'Registro não encontrado']);
         }
     } catch(Exception $e) {
-        // Em produção, não mostrar detalhes do erro, apenas log
         error_log("Erro em buscar_dados_aula: " . $e->getMessage());
+        ob_end_clean();
         echo json_encode(['erro' => 'Erro ao buscar dados da aula']);
     }
     exit();
@@ -312,11 +318,10 @@ if(@count($res_verificar) > 0) {
         'concluido' => $deve_concluir ? true : ($ja_concluido == 1)
     ];
     
-    // Adicionar informações de debug se existirem
     if(isset($debug_info)) {
         $resposta['debug'] = $debug_info;
     }
-    
+    ob_end_clean();
     echo json_encode($resposta);
 } else {
     // Se não existe, criar novo registro
@@ -329,16 +334,13 @@ if(@count($res_verificar) > 0) {
     $query_insert->bindValue(":timestamp_inicio", $timestamp_atual, PDO::PARAM_INT);
     $query_insert->execute();
     
-    // Buscar o ID do registro criado
     $id_tempo_aula = $pdo->lastInsertId();
-    
+    ob_end_clean();
     echo json_encode([
-        'sucesso' => true, 
-        'acao' => 'criado', 
+        'sucesso' => true,
+        'acao' => 'criado',
         'id' => $id_tempo_aula,
         'timestamp_inicio' => $timestamp_atual
     ]);
 }
-
-?>
 

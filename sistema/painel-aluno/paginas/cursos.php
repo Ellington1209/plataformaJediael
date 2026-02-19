@@ -101,7 +101,7 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 						<span style="margin-right:10px"><i class="fa fa-arrow-left" style="font-size:20px;"></i> Anterior
 						</span>
 					</a>
-					<button onclick="proximo()" class="cinza_escuro" id="btn-proximo">
+					<button onclick="proximo()" class="cinza_escuro" id="btn-proximo" disabled>
 						<span style="margin-right:10px">Próximo<i class="fa fa-arrow-right" style="font-size:20px;margin-left:3px"></i>
 						</span>
 					</button>
@@ -338,136 +338,13 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 
 <!-- modal prova -->
 
-<style>
-/* Estilos para modal de questionário - Mobile First */
-@media (max-width: 768px) {
-    #modalQuest .modal-dialog {
-        max-width: 95% !important;
-        margin: 10px auto;
-    }
-    
-    #modalQuest .modal-content {
-        border-radius: 10px;
-    }
-    
-    #modalQuest .modal-header h3,
-    #modalQuest .modal-header h5,
-    #modalQuest .modal-header h6 {
-        font-size: 14px !important;
-    }
-    
-    #modalQuest .modal-body {
-        padding: 15px;
-    }
-    
-    /* Melhorar visualização das perguntas no mobile */
-    #quest p {
-        font-size: 18px !important;
-        font-weight: 600 !important;
-        margin-bottom: 15px !important;
-        line-height: 1.4;
-        padding: 10px;
-        background-color: #f8f9fa;
-        border-radius: 5px;
-    }
-    
-    /* Melhorar alternativas no mobile */
-    #quest .form-check {
-        margin-bottom: 12px !important;
-        padding: 12px !important;
-        border: 2px solid #e9ecef;
-        border-radius: 8px;
-        background-color: #fff;
-        transition: all 0.3s ease;
-        display: flex !important;
-        align-items: flex-start !important;
-        flex-wrap: nowrap !important;
-    }
-    
-    #quest .form-check:hover,
-    #quest .form-check:active {
-        background-color: #f0f7ff;
-        border-color: #007bff;
-    }
-    
-    #quest .form-check-input {
-        width: 22px !important;
-        height: 22px !important;
-        margin-left: 0 !important;
-        margin-right: 12px !important;
-        margin-top: 2px !important;
-        cursor: pointer;
-        flex-shrink: 0 !important;
-    }
-    
-    #quest .form-check-label {
-        font-size: 15px !important;
-        font-weight: 400 !important;
-        margin-left: 0 !important;
-        line-height: 1.5;
-        cursor: pointer;
-        display: inline-block !important;
-        padding-left: 0;
-        flex: 1 !important;
-    }
-    
-    /* Área clicável maior - highlight no mobile */
-    #quest .form-check {
-        -webkit-tap-highlight-color: rgba(0, 123, 255, 0.2);
-    }
-    
-    #quest hr {
-        margin: 20px 0 !important;
-    }
-    
-    #modalQuest .modal-footer {
-        padding: 15px;
-    }
-    
-    #modalQuest .modal-footer .btn {
-        width: 100%;
-        padding: 12px;
-        font-size: 16px;
-        font-weight: 600;
-    }
-}
-
-/* Desktop */
-@media (min-width: 769px) {
-    #modalQuest .modal-dialog {
-        max-width: 80%;
-    }
-    
-    #quest .form-check {
-        padding: 10px;
-        margin-bottom: 10px;
-        display: flex !important;
-        align-items: flex-start !important;
-        flex-wrap: nowrap !important;
-    }
-    
-    #quest .form-check-input {
-        width: 18px;
-        height: 18px;
-        margin-right: 10px;
-        flex-shrink: 0 !important;
-    }
-    
-    #quest .form-check-label {
-        font-size: 14px;
-        display: inline-block !important;
-        flex: 1 !important;
-    }
-}
-</style>
-
 <div class="modal fade" id="modalQuest" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document" style="max-width: 80%; width: auto;">
+    <div class="modal-dialog" role="document" style="max-width: 80%; width: auto;">
         <div class="modal-content">
             <div class="modal-header">
-                <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap;">
-                    <h3 style="margin: 0 5px 0 0;">Prova: </h3>
-                    <h3 class="modal-title" id="exampleModalLabel" style="margin: 0;"><span id="curso_quest"></span> <span class="neutra ocultar-mobile"> </span> </h3>
+                <div style="display: flex; justify-content: center; align-items: center;">
+                    <h3>Prova: </h3>
+                    <h3 class="modal-title" id="exampleModalLabel"><span id="curso_quest"></span> <span class="neutra ocultar-mobile"> </span> </h3>
                 </div>
 
                 <div style="margin-top: 10px;">
@@ -482,7 +359,7 @@ if (@$_SESSION['nivel'] != 'Aluno') {
                 </button>
             </div>
 
-            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+            <div class="modal-body">
                 <form method="post" id="form-quest">
                     <div id="quest">
                     </div>
@@ -493,7 +370,7 @@ if (@$_SESSION['nivel'] != 'Aluno') {
                     </small>
                     <hr>                   
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary btn-lg">Finalizar</button>
+                        <button type="submit" class="btn btn-primary">Finalizar</button>
                     </div>
                 </form>
             </div>
@@ -541,6 +418,8 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 
 <script type="text/javascript">
 	function abrirAulas(id, nome, aulas, id_curso, link) {
+
+
 		if (link == "") {
 			document.getElementById('link-drive').style.display = 'none';
 		} else {
@@ -549,19 +428,7 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 
 		$('#nome_aula_titulo').text(nome);
 		$('#aulas_aula').text(aulas);
-		
-		// Corrigir aria-hidden quando o modal é aberto (usar off para evitar múltiplos listeners)
-		$('#modalAulas').off('shown.bs.modal').on('shown.bs.modal', function () {
-			$(this).removeAttr('aria-hidden');
-		});
-		
-		// Corrigir aria-hidden quando o modal é fechado
-		$('#modalAulas').off('hidden.bs.modal').on('hidden.bs.modal', function () {
-			$(this).attr('aria-hidden', 'true');
-		});
-		
 		$('#modalAulas').modal('show');
-		
 		$('#id_da_matricula').val(id);
 		$('#id_do_curso').val(id_curso);
 		$('#link_drive_curso').attr('href', link);
@@ -604,29 +471,12 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 
 <script type="text/javascript">
 	function abrirAula(id, aula, nome, tempo_aula) {
+		console.log(tempo_aula,"aqui")
 		var id_usu = localStorage.id_usu;
 		var questionario = "<?= $questionario_config ?>";
+		iniciarCronometro(tempo_aula);
 
 		$('#id_da_aula').val(id);
-		
-		// Chamar salvar-tempo-aula.php apenas UMA VEZ quando a aula é aberta
-		$.ajax({
-			url: 'paginas/' + pag + "/salvar-tempo-aula.php",
-			method: 'POST',
-			data: {
-				id_aula: id
-			},
-			dataType: "json",
-			success: function(result) {
-				console.log('DEBUG salvar-tempo-aula - Resposta:', result);
-				// Continuar normalmente mesmo se houver erro
-			},
-			error: function(xhr, status, error) {
-				console.error('DEBUG salvar-tempo-aula - Erro:', error);
-				// Continuar normalmente mesmo se houver erro
-			}
-		});
-		
 		$.ajax({
 			url: 'paginas/' + pag + "/listar-video.php",
 			method: 'POST',
@@ -678,20 +528,6 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 					$('#modalAula').modal('show');
 					$('#id_da_aula').val(res[3]);
 					$('#nome_da_sessao').text(res[4]);
-					
-					// Habilitar botão próximo inicialmente (será desabilitado pelo cronômetro se necessário)
-					var btnProximo = document.getElementById('btn-proximo');
-					if (btnProximo) {
-						btnProximo.disabled = false;
-					}
-					
-					// Debug: verificar valores antes de iniciar cronômetro
-					console.log('DEBUG abrirAula - tempo_aula recebido:', tempo_aula, 'tipo:', typeof tempo_aula);
-					console.log('DEBUG abrirAula - id_aula (res[3]):', res[3], 'tipo:', typeof res[3]);
-					
-					// Iniciar cronômetro após obter o ID da aula
-					// tempo_aula vem do banco em minutos, será convertido para segundos dentro de iniciarCronometro
-					iniciarCronometro(tempo_aula, res[3]);
 
 					/*
 					if(res[0] == 1){
@@ -714,14 +550,6 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 
 <script type="text/javascript">
 	function proximo() {
-		var btnProximo = document.getElementById('btn-proximo');
-		
-		// Verificar se o botão está desabilitado (tempo não acabou)
-		if (btnProximo && btnProximo.disabled) {
-			alert('Aguarde o tempo da aula terminar antes de avançar para a próxima aula.');
-			return;
-		}
-		
 		var id = $('#id_da_aula').val();
 		abrirAula(id, 'proximo');
 
@@ -753,6 +581,7 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 			dataType: "html",
 
 			success: function(result) {
+
 				$("#listar").html(result);
 				$('#mensagem-excluir').text('');
 			}
@@ -1039,59 +868,8 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 			data: { curso },			
 			dataType: "html",
 			success: function(result) {
+				console.log('adsiuids',result)
 				$("#quest").html(result);
-				
-				// Tornar toda a área clicável no mobile
-				$(document).off('click', '.quest-alternativa').on('click', '.quest-alternativa', function(e) {
-					var $this = $(this);
-					var $radio = $this.find('input[type=radio]');
-					var perguntaId = $this.data('pergunta');
-					
-					// Se clicou no radio, não fazer nada (deixa o comportamento padrão)
-					if ($(e.target).is('input[type=radio]')) {
-						return;
-					}
-					
-					// Marcar o radio
-					$radio.prop('checked', true).trigger('change');
-					
-					// Atualizar visual de todas as alternativas da mesma pergunta
-					$('.quest-alternativa[data-pergunta="' + perguntaId + '"]').each(function() {
-						if ($(this).find('input[type=radio]').is(':checked')) {
-							$(this).css({
-								'background-color': '#f0f7ff',
-								'border-color': '#007bff'
-							});
-						} else {
-							$(this).css({
-								'background-color': '#fff',
-								'border-color': '#e9ecef'
-							});
-						}
-					});
-				});
-				
-				// Atualizar visual quando radio muda
-				$(document).off('change', '.quest-alternativa input[type=radio]').on('change', '.quest-alternativa input[type=radio]', function() {
-					var $this = $(this);
-					var $container = $this.closest('.quest-alternativa');
-					var perguntaId = $container.data('pergunta');
-					
-					// Atualizar visual de todas as alternativas da mesma pergunta
-					$('.quest-alternativa[data-pergunta="' + perguntaId + '"]').each(function() {
-						if ($(this).find('input[type=radio]').is(':checked')) {
-							$(this).css({
-								'background-color': '#f0f7ff',
-								'border-color': '#007bff'
-							});
-						} else {
-							$(this).css({
-								'background-color': '#fff',
-								'border-color': '#e9ecef'
-							});
-						}
-					});
-				});
 			}
 		});
 	}
@@ -1133,126 +911,46 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 </script>
 <script>
 
-	// Variável global para controlar o intervalo de verificação
-	var intervaloVerificacao = null;
-	var idAulaAtual = null;
-
-    // Função para verificar liberação da aula baseada em timestamp
-function iniciarCronometro(tempo_aula, id_aula) {
-	// Limpar intervalo anterior se existir
-	if (intervaloVerificacao) {
-		clearInterval(intervaloVerificacao);
-		intervaloVerificacao = null;
-	}
-	
-	idAulaAtual = id_aula;
-	
-    // Garantir que o id_aula é válido
-    if (!id_aula || id_aula === undefined || id_aula === null) {
-        console.error('DEBUG Cronômetro - ERRO: id_aula inválido:', id_aula);
-        var cronometroElemento = document.getElementById('cronometro');
-        if (cronometroElemento) {
-            cronometroElemento.textContent = 'Erro: ID da aula inválido';
-            cronometroElemento.style.color = 'red';
-        }
-        return;
+	// Função para iniciar o cronômetro de contagem regressiva
+function iniciarCronometro(tempo_aula) {
+    // Garantir que o tempo_aula é um número válido
+    if (isNaN(tempo_aula) || tempo_aula === undefined || tempo_aula === null) {
+        console.error('O valor de tempo_aula é inválido:', tempo_aula);
+        return; // Interromper a execução caso o valor seja inválido
     }
-    
+
+    console.log('Tempo da aula recebido:', tempo_aula);
+
+    // Recupera o tempo restante do localStorage, ou define o tempo da aula caso seja a primeira vez
+    var tempoRestante = localStorage.getItem('tempo_restante') && !isNaN(localStorage.getItem('tempo_restante')) ?
+        parseInt(localStorage.getItem('tempo_restante')) :
+        tempo_aula * 60;
+
     var cronometroElemento = document.getElementById('cronometro');
     var btnProximo = document.getElementById('btn-proximo');
-    
-    // Debug: verificar se o elemento do cronômetro existe
-    if (!cronometroElemento) {
-        console.error('DEBUG Cronômetro - ERRO: Elemento #cronometro não encontrado no DOM!');
-        return;
-    }
-    
-    // Função para buscar dados da aula e verificar liberação
-    function verificarLiberacao() {
-        $.ajax({
-            url: 'paginas/' + pag + "/salvar-tempo-aula.php",
-            method: 'POST',
-            data: {
-                id_aula: id_aula,
-                acao: 'buscar_dados_aula'
-            },
-            dataType: "json",
-            success: function(result) {
-                if (result.erro) {
-                    console.error('DEBUG Cronômetro - Erro ao buscar dados:', result.erro);
-                    if (cronometroElemento) {
-                        cronometroElemento.textContent = 'Erro ao carregar dados da aula';
-                        cronometroElemento.style.color = 'red';
-                    }
-                    return;
-                }
-                
-                var concluido = result.concluido || false;
-                var liberado = result.liberado || false;
-                var hora_liberacao = result.hora_liberacao || '';
-                var timestamp_atual = result.timestamp_atual || Math.floor(Date.now() / 1000);
-                var timestamp_liberacao = result.timestamp_liberacao || 0;
-                
-                console.log('DEBUG Cronômetro - Dados recebidos:', {
-                    concluido: concluido,
-                    liberado: liberado,
-                    hora_liberacao: hora_liberacao,
-                    timestamp_atual: timestamp_atual,
-                    timestamp_liberacao: timestamp_liberacao
-                });
-                
-                if (concluido || liberado) {
-                    // Aula já foi liberada/concluída
-                    if (btnProximo) {
-                        btnProximo.disabled = false;
-                    }
-                    if (cronometroElemento) {
-                        cronometroElemento.textContent = 'Aula liberada';
-                        cronometroElemento.style.color = 'green';
-                    }
-                    // Limpar intervalo
-                    if (intervaloVerificacao) {
-                        clearInterval(intervaloVerificacao);
-                        intervaloVerificacao = null;
-                    }
-                    // Atualizar progresso
-                    if(typeof window.calcularProgressoCursos === 'function') {
-                        window.calcularProgressoCursos();
-                    }
-                } else {
-                    // Aula ainda não foi liberada - mostrar hora de liberação
-                    if (btnProximo) {
-                        btnProximo.disabled = true;
-                    }
-                    if (cronometroElemento && hora_liberacao) {
-                        cronometroElemento.textContent = 'Esta aula será liberada às ' + hora_liberacao + ' hrs';
-                        cronometroElemento.style.color = '#333';
-                    }
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('DEBUG Cronômetro - Erro na requisição:', error);
-                if (cronometroElemento) {
-                    cronometroElemento.textContent = 'Erro ao verificar liberação';
-                    cronometroElemento.style.color = 'red';
-                }
-            }
-        });
-    }
-    
-    // Verificar imediatamente
-    verificarLiberacao();
-    
-    // Verificar a cada 10 segundos
-    intervaloVerificacao = setInterval(verificarLiberacao, 10000);
-    
-    // Limpar intervalo quando o modal for fechado
-    $('#modalAula').on('hidden.bs.modal', function() {
-        if (intervaloVerificacao) {
-            clearInterval(intervaloVerificacao);
-            intervaloVerificacao = null;
+
+    function atualizarCronometro() {
+        var minutos = Math.floor(tempoRestante / 60);
+        var segundos = tempoRestante % 60;
+        var textoCronometro = minutos.toString().padStart(2, '0') + ':' + segundos.toString().padStart(2, '0');
+        cronometroElemento.textContent = textoCronometro;
+
+        // Salvar o tempo restante no localStorage
+        localStorage.setItem('tempo_restante', tempoRestante);
+
+        if (tempoRestante === 0) {
+            // Quando o cronômetro zerar, habilitar o botão "Próximo"
+            btnProximo.disabled = false;
+            localStorage.removeItem('tempo_restante'); // Limpar o localStorage
+        } else {
+            tempoRestante--;
+            // Desabilitar o botão "Próximo" enquanto o cronômetro estiver contando
+            btnProximo.disabled = true;
+            setTimeout(atualizarCronometro, 1000); // Atualizar a cada segundo
         }
-    });
+    }
+
+    atualizarCronometro();
 }
 
 </script>
