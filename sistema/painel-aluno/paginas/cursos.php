@@ -470,11 +470,39 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 
 
 <script type="text/javascript">
+	var lessonTimerId = null;
+
+	function syncTempoAula(idAula, actionName) {
+		if (!idAula) {
+			console.warn('syncTempoAula sem idAula');
+			return;
+		}
+
+		var payload = {
+			id_aula: idAula,
+			acao: actionName || 'iniciar'
+		};
+
+		console.log('syncTempoAula payload:', payload);
+
+		$.ajax({
+			url: 'paginas/' + pag + "/salvar-tempo-aula.php",
+			method: 'POST',
+			data: payload,
+			dataType: "json",
+			success: function(result) {
+				console.log('syncTempoAula response:', result);
+			},
+			error: function(xhr) {
+				console.error('syncTempoAula erro:', xhr.responseText);
+			}
+		});
+	}
+
 	function abrirAula(id, aula, nome, tempo_aula) {
 		console.log(tempo_aula,"aqui")
 		var id_usu = localStorage.id_usu;
 		var questionario = "<?= $questionario_config ?>";
-		iniciarCronometro(tempo_aula);
 
 		$('#id_da_aula').val(id);
 		$.ajax({
@@ -528,6 +556,8 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 					$('#modalAula').modal('show');
 					$('#id_da_aula').val(res[3]);
 					$('#nome_da_sessao').text(res[4]);
+					syncTempoAula(res[3], 'iniciar');
+					iniciarCronometro(tempo_aula, res[3]);
 
 					/*
 					if(res[0] == 1){
@@ -912,7 +942,7 @@ if (@$_SESSION['nivel'] != 'Aluno') {
 <script>
 
 	// Função para iniciar o cronômetro de contagem regressiva
-function iniciarCronometro(tempo_aula) {
+function iniciarCronometro(tempo_aula, idAula) {
     // Garantir que o tempo_aula é um número válido
     if (isNaN(tempo_aula) || tempo_aula === undefined || tempo_aula === null) {
         console.error('O valor de tempo_aula é inválido:', tempo_aula);
@@ -929,6 +959,11 @@ function iniciarCronometro(tempo_aula) {
     var cronometroElemento = document.getElementById('cronometro');
     var btnProximo = document.getElementById('btn-proximo');
 
+    if (lessonTimerId) {
+        clearTimeout(lessonTimerId);
+        lessonTimerId = null;
+    }
+
     function atualizarCronometro() {
         var minutos = Math.floor(tempoRestante / 60);
         var segundos = tempoRestante % 60;
@@ -942,11 +977,13 @@ function iniciarCronometro(tempo_aula) {
             // Quando o cronômetro zerar, habilitar o botão "Próximo"
             btnProximo.disabled = false;
             localStorage.removeItem('tempo_restante'); // Limpar o localStorage
+            console.log('Cronômetro finalizado para aula:', idAula);
+            syncTempoAula(idAula, 'concluir');
         } else {
             tempoRestante--;
             // Desabilitar o botão "Próximo" enquanto o cronômetro estiver contando
             btnProximo.disabled = true;
-            setTimeout(atualizarCronometro, 1000); // Atualizar a cada segundo
+            lessonTimerId = setTimeout(atualizarCronometro, 1000); // Atualizar a cada segundo
         }
     }
 

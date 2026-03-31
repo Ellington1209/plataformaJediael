@@ -3,12 +3,48 @@ ini_set('display_errors', '0');
 error_reporting(0);
 ob_start();
 header('Content-Type: application/json; charset=utf-8');
+
+set_exception_handler(function($e) {
+    if (ob_get_length()) {
+        ob_end_clean();
+    }
+    http_response_code(500);
+    echo json_encode([
+        'erro' => 'Exception',
+        'mensagem' => $e->getMessage(),
+        'arquivo' => $e->getFile(),
+        'linha' => $e->getLine()
+    ]);
+    exit();
+});
+
+register_shutdown_function(function() {
+    $error = error_get_last();
+    if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+        if (ob_get_length()) {
+            ob_end_clean();
+        }
+        http_response_code(500);
+        echo json_encode([
+            'erro' => 'Fatal Error',
+            'mensagem' => $error['message'],
+            'arquivo' => $error['file'],
+            'linha' => $error['line']
+        ]);
+    }
+});
 require_once("../../../conexao.php");
 @session_start();
 
 $id_aula = isset($_POST['id_aula']) ? $_POST['id_aula'] : null;
 $id_aluno = isset($_SESSION['id']) ? $_SESSION['id'] : null;
 $acao = isset($_POST['acao']) ? $_POST['acao'] : null;
+
+error_log("[salvar-tempo-aula] POST => " . print_r($_POST, true));
+error_log("[salvar-tempo-aula] session_id => " . (isset($_SESSION['id']) ? $_SESSION['id'] : 'null'));
+
+$debugLine = date('Y-m-d H:i:s') . " | POST=" . json_encode($_POST) . " | session_id=" . (isset($_SESSION['id']) ? $_SESSION['id'] : 'null') . PHP_EOL;
+@file_put_contents(__DIR__ . '/tempo_aulas_debug.log', $debugLine, FILE_APPEND);
 
 if($acao != 'buscar_dados_aula') {
     if(!$id_aula || !$id_aluno) {
@@ -327,10 +363,18 @@ if(@count($res_verificar) > 0) {
     // Se não existe, criar novo registro
     $timestamp_atual = time();
     
-    $query_insert = $pdo->prepare("INSERT INTO tempo_aulas (id_aula, id_aluno, timestamp_inicio, data_criacao) 
-                                   VALUES (:id_aula, :id_aluno, :timestamp_inicio, CURRENT_TIMESTAMP)");
+    $query_aula_tempo = $pdo->prepare("SELECT tempo_aula FROM aulas WHERE id = :id_aula LIMIT 1");
+    $query_aula_tempo->bindValue(":id_aula", $id_aula, PDO::PARAM_INT);
+    $query_aula_tempo->execute();
+    $res_aula_tempo = $query_aula_tempo->fetchAll(PDO::FETCH_ASSOC);
+    $tempo_aula_minutos = @count($res_aula_tempo) > 0 ? (int)$res_aula_tempo[0]['tempo_aula'] : 0;
+    $tempo_restante_inicial = $tempo_aula_minutos * 60;
+    
+    $query_insert = $pdo->prepare("INSERT INTO tempo_aulas (id_aula, id_aluno, tempo_restante, timestamp_inicio, data_criacao) 
+                                   VALUES (:id_aula, :id_aluno, :tempo_restante, :timestamp_inicio, CURRENT_TIMESTAMP)");
     $query_insert->bindValue(":id_aula", $id_aula, PDO::PARAM_INT);
     $query_insert->bindValue(":id_aluno", $id_aluno, PDO::PARAM_INT);
+    $query_insert->bindValue(":tempo_restante", $tempo_restante_inicial, PDO::PARAM_INT);
     $query_insert->bindValue(":timestamp_inicio", $timestamp_atual, PDO::PARAM_INT);
     $query_insert->execute();
     
