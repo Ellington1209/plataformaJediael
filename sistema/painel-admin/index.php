@@ -208,6 +208,7 @@ $senha_usuario = $res[0]['senha'];
                 </a>
                 <ul class="treeview-menu">
                   <li><a href="index.php?pagina=cursos"><i class="fa fa-angle-right"></i> Cursos</a></li>
+                  <li class="<?php echo $ocultar ?>"><a href="index.php?pagina=liberar_prova_aluno"><i class="fa fa-angle-right"></i> Liberar Prova Aluno</a></li>
                 
                    <li class="<?php echo $ocultar ?>"><a href="index.php?pagina=grupos"><i class="fa fa-angle-right"></i> Grupos</a></li>
                    <li class="<?php echo $ocultar ?>"><a href="index.php?pagina=categorias"><i class="fa fa-angle-right"></i> Categorias</a></li>
