@@ -277,8 +277,11 @@ $quest_tooltip = '';
 $quest_style = '';
 
 if($questionario_config == 'Sim'){
-	// Verificar se todas as aulas foram concluídas (permitir mesmo se status já for Finalizado)
-	if($total_aulas > 0 && $total_aulas == $aulas_realmente_concluidas){
+	$materia_concluida = $total_aulas > 0 && (
+		$total_aulas == $aulas_realmente_concluidas ||
+		$tempo_restante_total_segundos <= 0
+	);
+	if($materia_concluida){
 		$quest_disabled = '';
 		$quest_style = '';
 		$quest_tooltip = 'Iniciar Questionário';
@@ -432,7 +435,7 @@ HTML;
 							// Atualizar data-tempo-restante com o valor do servidor
 							$questLink.data('tempo-restante', tempoRestanteSegundos);
 							
-							if(porcentagem >= 100 && aulasConcluidas >= totalAulas && totalAulas > 0) {
+							if(porcentagem >= 100 && totalAulas > 0) {
 								// Curso concluído - habilitar questionário
 								$questLink.removeClass('disabled');
 								$questLink.removeAttr('disabled'); // Remover atributo disabled

@@ -41,7 +41,6 @@ foreach($res_aulas as $aula) {
                 $progresso_aula = 100;
                 $aulas_concluidas++;
             } else {
-                // Se não tem timestamp_inicio, usar data_criacao como fallback
                 if(!$timestamp_inicio || $timestamp_inicio == 0) {
                     if($data_criacao) {
                         $timestamp_inicio = strtotime($data_criacao);
@@ -49,19 +48,18 @@ foreach($res_aulas as $aula) {
                 }
                 
                 if($timestamp_inicio && $timestamp_inicio > 0) {
-                    // Calcular tempo decorrido desde o início
                     $tempo_decorrido_segundos = $timestamp_atual - $timestamp_inicio;
                     
-                    // Calcular progresso baseado no tempo decorrido
                     if($tempo_decorrido_segundos >= $tempo_aula_segundos) {
                         $progresso_aula = 100;
+                        $aulas_concluidas++;
+                        $pdo->query("UPDATE tempo_aulas SET concluido = 1 WHERE id_aula = '$id_aula' AND id_aluno = '$id_aluno'");
                     } else if($tempo_decorrido_segundos > 0) {
                         $progresso_aula = ($tempo_decorrido_segundos / $tempo_aula_segundos) * 100;
                     } else {
                         $progresso_aula = 0;
                     }
                     
-                    // Garantir limites
                     if($progresso_aula < 0) $progresso_aula = 0;
                     if($progresso_aula > 100) $progresso_aula = 100;
                 } else {
