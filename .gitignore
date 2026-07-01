@@ -1,1 +1,27 @@
 /sistema/conexao.php
+
+# Servidor / FTP
+.ftpquota
+error_log
+**/error_log
+
+# Logs de debug
+**/*.log
+
+# Backups automáticos do painel
+sistema/painel-admin/backup/*.sql
+
+# Uploads gerados em produção (admin)
+sistema/painel-admin/img/**/*
+!sistema/painel-admin/img/
+!sistema/painel-admin/img/index.php
+!sistema/painel-admin/img/**/
+!sistema/painel-admin/img/**/index.php
+!sistema/painel-admin/img/**/sem-foto.png
+
+# Uploads gerados em produção (aluno)
+sistema/painel-aluno/img/**/*
+!sistema/painel-aluno/img/
+!sistema/painel-aluno/img/index.php
+!sistema/painel-aluno/img/**/
+!sistema/painel-aluno/img/**/index.php
